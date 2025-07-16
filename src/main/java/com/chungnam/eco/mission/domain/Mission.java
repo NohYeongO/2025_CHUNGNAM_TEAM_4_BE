@@ -44,11 +44,28 @@ public class Mission extends BaseTimeEntity {
     private Integer rewardPoints;
 
     @Builder
-    public Mission(String title, String description, MissionType type, MissionStatus status, Integer rewardPoints) {
+    public Mission(String title, String description, MissionType type, Integer rewardPoints) {
         this.title = title;
         this.description = description;
         this.type = type;
-        this.status = status;
+        this.status = MissionStatus.CREATE; // 생성으로 초기화
         this.rewardPoints = rewardPoints;
     }
+
+    /**
+     * 미션을 활성화 상태로 변경합니다.
+     */
+    public void activate() {
+        this.status = MissionStatus.ACTIVATE;
+    }
+
+    /**
+     * 미션을 삭제 상태로 변경합니다.
+     */
+    public void delete() {
+        this.status = MissionStatus.DELETE;
+    }
+
+
+
 }
