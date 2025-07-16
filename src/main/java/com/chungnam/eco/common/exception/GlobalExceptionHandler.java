@@ -31,4 +31,25 @@ public class GlobalExceptionHandler {
                 .status(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus())
                 .body(errorResponse);
     }
+
+    // 커스텀 예외 처리
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> challengeHandleException(
+            BusinessException e,
+            HttpServletRequest request) {
+
+        log.error("Unexpected error occurred: ", e);
+
+        ErrorCode errorCode = e.getErrorCode();
+
+        ErrorResponse errorResponse = ErrorResponse.of(
+                errorCode.getCode(),
+                errorCode.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(errorResponse);
+    }
 }
