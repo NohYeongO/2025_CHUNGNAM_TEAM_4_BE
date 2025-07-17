@@ -1,4 +1,4 @@
 package com.chungnam.eco.user.repository;
 
-public class UserJPARepository {
+public class RefreshTokenRepository {
 }
