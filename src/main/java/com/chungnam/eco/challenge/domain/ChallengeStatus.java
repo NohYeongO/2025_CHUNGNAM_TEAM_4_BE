@@ -1,7 +1,8 @@
 package com.chungnam.eco.challenge.domain;
 
 public enum ChallengeStatus {
-    BEFORE,
+    PENDING,
+    REJECTED,
     IN_PROGRESS,
     COMPLETED
 }

@@ -52,29 +52,39 @@ public class Challenge extends BaseTimeEntity {
     private LocalDateTime completedAt;
 
     @Builder
-    public Challenge(Member member, Mission mission, String submissionText) {
+    public Challenge(Member member, Mission mission) {
         this.member = member;
         this.mission = mission;
-        this.submissionText = submissionText;
-        this.challengeStatus = ChallengeStatus.BEFORE; // 미션 진행전으로 초기화
+        this.startedAt = LocalDateTime.now();
+        this.challengeStatus = ChallengeStatus.IN_PROGRESS; // 미션 진행
     }
 
     /**
-     * 지정한 시각에 챌린지를 시작 상태로 전환합니다.
-     * @param startedAt 시작 시각
+     * 챌린지 승인 요청 상태로 전환합니다.
+     *
+     * @param description 승인 요청 시 제출한 설명
      */
-    public void setStartedAt(LocalDateTime startedAt) {
-        this.startedAt = startedAt;
-        this.challengeStatus = ChallengeStatus.IN_PROGRESS; // 미션 진행
+    public void setPending(String description) {
+        this.challengeStatus = ChallengeStatus.PENDING; // 미션 승인 요청
+        this.submissionText = description; // 미션 완료 후 설명글 추가
+    }
+
+    /**
+     * 챌린지 승인을 거절합니다.
+     *
+     * @param rejectionReason 거절 사유
+     */
+    public void setRejected(String rejectionReason) {
+        this.challengeStatus = ChallengeStatus.REJECTED; // 미션 승인 거절
+        this.submissionText = rejectionReason; // 거절 사유 추가
     }
 
 
     /**
      * 지정한 시각에 챌린지를 완료 상태로 전환합니다.
-     * @param completedAt 시작 시각
      */
-    public void setCompletedAt(LocalDateTime completedAt) {
-        this.completedAt = completedAt;
+    public void setCompleted() {
+        this.completedAt = LocalDateTime.now();
         this.challengeStatus = ChallengeStatus.COMPLETED; // 미션 완료
     }
 
