@@ -12,6 +12,7 @@ public class GlobalExceptionHandler {
 
     /**
      * 모든 예외를 처리하는 핸들러 (예시)
+     *
      * @return ResponseEntity<ErrorResponse>
      */
     @ExceptionHandler(Exception.class)
@@ -20,13 +21,13 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         
         log.error("Unexpected error occurred: ", e);
-        
+
         ErrorResponse errorResponse = ErrorResponse.of(
                 ErrorCode.INTERNAL_SERVER_ERROR.getCode(),
                 ErrorCode.INTERNAL_SERVER_ERROR.getMessage(),
                 request.getRequestURI()
         );
-        
+
         return ResponseEntity
                 .status(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus())
                 .body(errorResponse);
@@ -34,7 +35,7 @@ public class GlobalExceptionHandler {
 
     // 커스텀 예외 처리
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> challengeHandleException(
+    public ResponseEntity<ErrorResponse> HandleBusinessException(
             BusinessException e,
             HttpServletRequest request) {
 
