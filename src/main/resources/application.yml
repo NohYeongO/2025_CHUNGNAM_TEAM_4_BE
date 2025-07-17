@@ -12,3 +12,22 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+redis:
+  main:
+    host: ${REDIS_MAIN_HOST:localhost}
+    port: 6379
+
+# JWT 설정 (JWT Provider용)
+jwt:
+  secret: ${JWT_SECRET:ZGVmYXVsdFNlY3JldEtleUZvckpXVFRva2VuVGhhdElzUmVhbGx5TG9uZ0FuZFNlY3VyZUZvclByb2R1Y3Rpb24=}
+  expiration: ${JWT_ACCESS_TOKEN_VALIDITY:86400}
+
+# Discord 알림 설정
+discord:
+  webhook:
+    url: ${DISCORD_WEBHOOK_URL:https://discord.com/api/webhooks/1395237547109781504/iS3I4t2BYbX3hsvnlbX1Js0CeMKZ_vxi8Oqhpq0opPrlqsM1V9jLfqVS-QO_abxIpTde}
+
+logging:
+  config: classpath:logback-spring.xml
+
