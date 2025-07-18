@@ -1,36 +1,12 @@
 package com.chungnam.eco.admin.controller;
 
-import com.chungnam.eco.common.security.AuthenticationHelper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/admin")
-@RequiredArgsConstructor
+// TODO: 관리자 전용 API - 임시 TODO 세팅
 public class AdminController {
-
-    /**
-     * 관리자 권한 테스트 API
-     * @return 현재 사용자 정보 및 권한
-     */
-    @GetMapping("/test")
-    public ResponseEntity<Map<String, Object>> testAdminAccess() {
-        Long userId = AuthenticationHelper.getCurrentUserId();
-        String role = AuthenticationHelper.getCurrentUserRole();
-        boolean isAdmin = AuthenticationHelper.isAdmin();
-        
-        Map<String, Object> response = Map.of(
-            "message", "관리자 API 접근 성공!",
-            "userId", userId,
-            "role", role,
-            "isAdmin", isAdmin
-        );
-        
-        return ResponseEntity.ok(response);
-    }
 
     @GetMapping("/challenges")
     public ResponseEntity<?> getMissionAuthList(
