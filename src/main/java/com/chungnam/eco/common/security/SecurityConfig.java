@@ -58,7 +58,7 @@ public class SecurityConfig {
                         ).permitAll()
                         
                         // 관리자 API
-                        .requestMatchers("/api/admin/**").hasRole("ROLE_ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         
                         // 나머지는 모두 인증 필요
                         .anyRequest().authenticated()

@@ -1,8 +1,11 @@
 package com.chungnam.eco.mission.domain;
 
+import lombok.Getter;
+
 /**
  * 미션 장르 구분
  */
+@Getter
 public enum MissionCategory {
     
     DAILY_HABIT("일상 속 습관"),
@@ -19,8 +22,4 @@ public enum MissionCategory {
     MissionCategory(String description) {
         this.description = description;
     }
-
-    public String getDescription() {
-        return description;
-    }
-} 
+}
