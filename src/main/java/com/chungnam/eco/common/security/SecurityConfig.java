@@ -1,6 +1,5 @@
-package com.chungnam.eco.common.config;
+package com.chungnam.eco.common.security;
 
-import com.chungnam.eco.common.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,7 +58,7 @@ public class SecurityConfig {
                         ).permitAll()
                         
                         // 관리자 API
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ROLE_ADMIN")
                         
                         // 나머지는 모두 인증 필요
                         .anyRequest().authenticated()
