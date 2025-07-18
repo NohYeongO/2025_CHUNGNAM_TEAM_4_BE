@@ -2,7 +2,7 @@ package com.chungnam.eco.challenge.domain;
 
 import com.chungnam.eco.common.entity.BaseTimeEntity;
 import com.chungnam.eco.mission.domain.Mission;
-import com.chungnam.eco.user.domain.Member;
+import com.chungnam.eco.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -31,8 +31,8 @@ public class Challenge extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mission_id", nullable = false)
@@ -52,8 +52,8 @@ public class Challenge extends BaseTimeEntity {
     private LocalDateTime completedAt;
 
     @Builder
-    public Challenge(Member member, Mission mission) {
-        this.member = member;
+    public Challenge(User user, Mission mission) {
+        this.user = user;
         this.mission = mission;
         this.startedAt = LocalDateTime.now();
         this.challengeStatus = ChallengeStatus.IN_PROGRESS; // 미션 진행

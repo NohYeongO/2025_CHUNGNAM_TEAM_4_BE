@@ -1,64 +1,100 @@
 package com.chungnam.eco.user.controller;
 
+import com.chungnam.eco.common.security.AuthenticationHelper;
+import com.chungnam.eco.user.controller.request.FindUserIdRequest;
+import com.chungnam.eco.user.controller.request.SignInRequest;
+import com.chungnam.eco.user.controller.request.SignUpRequest;
+import com.chungnam.eco.user.controller.response.EmailCheckResponse;
+import com.chungnam.eco.user.controller.response.FindUserIdResponse;
+import com.chungnam.eco.user.controller.response.SignInResponse;
+import com.chungnam.eco.user.controller.response.SignUpResponse;
+import com.chungnam.eco.user.controller.response.UserMainResponse;
+import com.chungnam.eco.user.service.UserAppService;
+import com.chungnam.eco.user.service.UserAuthService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/members")
-// TODO: 회원 관련 API - 임시 TODO 세팅
+@RequiredArgsConstructor
 public class UserController {
 
+    private final UserAppService userAppService;
+    private final UserAuthService userAuthService;
+
+    /**
+     * 이메일 중복 체크 API
+     * @param email 중복 체크할 이메일
+     * @return EmailCheckResponse(이메일 사용 가능 여부, Message)
+     */
     @GetMapping("/check-email")
-    public ResponseEntity<?> checkEmailDuplicate(@RequestParam String email) {
-        // TODO: 이메일 중복 여부 확인 로직
-        return ResponseEntity.ok().build();
+    public ResponseEntity<EmailCheckResponse> checkEmailDuplicate(@RequestParam String email) {
+        EmailCheckResponse response = userAuthService.checkEmailDuplicate(email);
+        return ResponseEntity.ok(response);
     }
 
+    /**
+     * 회원가입 API
+     * @param request 회원가입 요청 정보 (이메일, 비밀번호, 닉네임)
+     * @return SignUpResponse(회원가입 성공 여부, Message, 가입 email)
+     */
     @PostMapping("/sign-up")
-    public ResponseEntity<?> signUp(@RequestBody Object signUpRequest) {
-        // TODO: 회원가입 처리 로직
-        return ResponseEntity.ok().build();
+    public ResponseEntity<SignUpResponse> signUp(@Valid @RequestBody SignUpRequest request) {
+        SignUpResponse response = userAuthService.signUp(request);
+        return response.isSuccess() 
+                ? ResponseEntity.ok(response) 
+                : ResponseEntity.badRequest().body(response);
     }
 
+    /**
+     * 로그인 API
+     * @param request 로그인 요청 정보 (이메일, 비밀번호)
+     * @return SignInResponse(로그인 성공 여부, Message, JWT 토큰)
+     */
     @PostMapping("/sign-in")
-    public ResponseEntity<?> signIn(@RequestBody Object signInRequest) {
-        // TODO: 로그인 처리 로직 (JWT or 세션)
-        return ResponseEntity.ok().build();
+    public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest request) {
+        SignInResponse response = userAuthService.signIn(request);
+        return response.isSuccess() 
+                ? ResponseEntity.ok(response) 
+                : ResponseEntity.badRequest().body(response);
     }
 
-    @GetMapping("/auth/google/callback")
-    public ResponseEntity<?> googleCallback(@RequestParam String code) {
-        // TODO: Google OAuth 콜백 처리
-        return ResponseEntity.ok().build();
-    }
-
+    /**
+     * 아이디 찾기 API
+     * @param request 아이디 찾기 요청 정보 (닉네임)
+     * @return FindUserIdResponse(찾기 성공 여부, Message, 마스킹된 이메일)
+     */
     @PostMapping("/find-id")
-    public ResponseEntity<?> findUserId(@RequestBody Object findIdRequest) {
-        // TODO: 이름, 전화번호 등으로 이메일 반환
-        return ResponseEntity.ok("user@example.com");
+    public ResponseEntity<FindUserIdResponse> findUserId(@Valid @RequestBody FindUserIdRequest request) {
+        FindUserIdResponse response = userAuthService.findUserId(request);
+        return response.isSuccess() 
+                ? ResponseEntity.ok(response) 
+                : ResponseEntity.badRequest().body(response);
     }
 
-    @PostMapping("/verification/confirm")
-    public ResponseEntity<?> verifyUser(@RequestBody Object verificationRequest) {
-        // TODO: 본인 확인 로직 (이름, 이메일, 인증번호 등)
-        return ResponseEntity.ok().build();
-    }
 
-    @PatchMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody Object resetPasswordRequest) {
-        // TODO: 새 비밀번호 저장 로직
-        return ResponseEntity.ok().build();
-    }
 
+    /**
+     * 메인 페이지 정보 조회 API (인증 필요)
+     * @return UserMainResponse(사용자 메인 페이지 정보)
+     */
     @GetMapping("/main")
-    public ResponseEntity<?> getMainPageInfo() {
-        // TODO: 로그인된 사용자 정보 (닉네임, 보유 포인트)
-        // + 오늘의 미션 목록(상태 포함) 조회 로직 구현
-        return ResponseEntity.ok().build();
+    public ResponseEntity<UserMainResponse> getMainPageInfo() {
+        Long userId = AuthenticationHelper.getCurrentUserId();
+        return ResponseEntity.ok(userAppService.getUserMainInfo(userId));
     }
 
+    /**
+     * 내가 참여한 미션 이력 조회 API (인증 필요)
+     * @return 사용자가 참여한 모든 미션 및 상태
+     */
     @GetMapping("/my-page/challenges")
     public ResponseEntity<?> getMyMissionParticipationHistory() {
+        Long userId = AuthenticationHelper.getCurrentUserId();
         // TODO: 사용자가 참여한 모든 미션 + 상태(진행중, 심사중, 성공, 실패) 조회
         return ResponseEntity.ok().build();
     }

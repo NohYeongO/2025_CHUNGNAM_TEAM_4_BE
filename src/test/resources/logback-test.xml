@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 테스트 환경에서 필요한 로그만 출력 -->
+    
+    <!-- 콘솔 출력 설정 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{20} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 패키지별 로그 레벨 설정 -->
+    <!-- 애플리케이션 로그 -->
+    <logger name="com.chungnam.eco" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    
+    <!-- SQL 로그 설정 -->
+    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    
+    <!-- SQL 파라미터 바인딩 로그 -->
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    
+    <!-- 프레임워크 로그 최소화 -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="org.testcontainers" level="WARN"/>
+    <logger name="com.github.dockerjava" level="ERROR"/>
+    <logger name="com.mysql" level="ERROR"/>
+    
+    <!-- 캐시 로그 최소화 -->
+    <logger name="org.springframework.cache" level="WARN"/>
+    
+    <!-- 웹 관련 로그 최소화 -->
+    <logger name="org.springframework.web" level="WARN"/>
+    
+    <!-- HTTP 클라이언트 로그 최소화 -->
+    <logger name="org.springframework.web.reactive.function.client" level="WARN"/>
+    <logger name="reactor.netty" level="WARN"/>
+
+    <!-- 루트 로거 설정 -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration> 
