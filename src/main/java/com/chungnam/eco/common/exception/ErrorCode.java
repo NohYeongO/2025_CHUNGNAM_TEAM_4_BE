@@ -13,8 +13,15 @@ public enum ErrorCode {
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "S002", "잘못된 요청입니다."),
 
     // challenge가 존재하지 않을 때 에러
-    INVALID_CHALLENGE(HttpStatus.INTERNAL_SERVER_ERROR,"S003","challenge가 존재하지 않습니다.");
-    
+    INVALID_CHALLENGE(HttpStatus.INTERNAL_SERVER_ERROR,"S003","challenge가 존재하지 않습니다."),
+
+    // 사용자 관련 에러
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "사용자를 찾을 수 없습니다."),
+
+    // 인증/인가 관련 에러
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A001", "유효하지 않은 토큰입니다."),
+    MISSING_AUTHORIZATION_HEADER(HttpStatus.UNAUTHORIZED, "A002", "Authorization 헤더가 없거나 Bearer 토큰 형식이 아닙니다.");
+
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;

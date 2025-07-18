@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 기본 콘솔 출력 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- 파일 출력 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>./logs/application.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>./logs/application.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <!-- 디렉토리 자동 생성 -->
+        <prudent>false</prudent>
+    </appender>
+    
+    <!-- Discord ERROR 알림 Appender -->
+    <appender name="DISCORD_ERROR" class="com.chungnam.eco.common.notification.DiscordLogAppender">
+        <webhookUrl>${DISCORD_WEBHOOK_URL}</webhookUrl>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+    
+    <!-- 특정 패키지는 ERROR 로그를 Discord로 보내지 않음 (선택사항) -->
+    <logger name="org.springframework" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+    
+    <logger name="org.hibernate" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+    
+    <!-- 우리 애플리케이션 로그는 모든 레벨 + Discord ERROR 알림 -->
+    <logger name="com.chungnam.eco" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="DISCORD_ERROR"/>
+    </logger>
+    
+    <!-- Root 로거 (기본 설정) -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <!-- 프로덕션에서는 외부 라이브러리 ERROR도 Discord로 보낼지 결정 -->
+        <!-- <appender-ref ref="DISCORD_ERROR"/> -->
+    </root>
+    
+    <!-- 프로파일별 설정 -->
+    <springProfile name="prod">
+        <!-- 프로덕션에서는 모든 ERROR를 Discord로 전송 -->
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="DISCORD_ERROR"/>
+        </root>
+    </springProfile>
+    
+    <springProfile name="dev,local">
+        <!-- 개발환경에서는 우리 패키지만 Discord 전송 -->
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </root>
+    </springProfile>
+</configuration>
