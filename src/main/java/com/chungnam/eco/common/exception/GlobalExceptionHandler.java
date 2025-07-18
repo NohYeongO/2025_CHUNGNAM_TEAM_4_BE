@@ -124,12 +124,12 @@ public class GlobalExceptionHandler {
     }
 
     // 커스텀 예외 처리
-    @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> HandleBusinessException(
-            BusinessException e,
+    @ExceptionHandler(InvalidChallengeException.class)
+    public ResponseEntity<ErrorResponse> HandleInvalidChallengeException(
+            InvalidChallengeException e,
             HttpServletRequest request) {
 
-        log.error("Unexpected error occurred: ", e);
+        log.error("Invalid challenge : ", e);
 
         ErrorCode errorCode = e.getErrorCode();
 

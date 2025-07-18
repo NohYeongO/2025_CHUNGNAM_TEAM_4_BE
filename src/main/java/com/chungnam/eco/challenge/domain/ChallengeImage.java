@@ -1,8 +1,7 @@
 package com.chungnam.eco.challenge.domain;
 
-import com.chungnam.eco.challenge.exception.InvalidChallengeException;
 import com.chungnam.eco.common.entity.BaseTimeEntity;
-import com.chungnam.eco.common.exception.ErrorCode;
+import com.chungnam.eco.common.exception.InvalidChallengeException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -66,7 +65,7 @@ public class ChallengeImage extends BaseTimeEntity {
     // 이미지 경로 생성
     private String generateUrl() {
         if (this.challenge == null || this.challenge.getId() == null) {
-            throw new InvalidChallengeException(ErrorCode.INVALID_CHALLENGE); // challenge 없을 경우 예외 처리
+            throw new InvalidChallengeException("첼린지가 존재하지 않습니다"); // challenge 없을 경우 예외 처리
         }
         return "/images/" + this.challenge.getId() + "/" + this.storedName; // challenge id 로 폴더 생성 후 이미지 저장
     }
