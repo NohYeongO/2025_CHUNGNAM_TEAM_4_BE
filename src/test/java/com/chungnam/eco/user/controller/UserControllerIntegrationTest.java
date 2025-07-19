@@ -47,5 +47,8 @@ class UserControllerIntegrationTest extends TestContainerConfig {
         assertThat(response.getBody().getDailyMissions()).isNotNull();
         assertThat(response.getBody().getDailyMissions().size()).isEqualTo(3);
         assertThat(response.getBody().getWeeklyMissions()).isNotNull();
+        System.out.println(response.getBody().getWeeklyMissions().toString());
+        System.out.println(response.getBody().getDailyMissions().toString());
+        System.out.println(response.getBody().toString());
     }
 }
