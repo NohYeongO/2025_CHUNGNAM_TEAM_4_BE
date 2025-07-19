@@ -86,7 +86,7 @@ public class MissionService {
         try {
             return MissionStatus.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new InvalidMissionException("잘못된 상태값입니다: " + status);
+            throw new InvalidMissionException("Mission의 잘못된 상태값입니다. : " + status);
         }
     }
 
