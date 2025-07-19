@@ -109,7 +109,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(
             Exception e,
             HttpServletRequest request) {
-        
+
         log.error("Unexpected error occurred: ", e);
 
         ErrorResponse errorResponse = ErrorResponse.of(
@@ -130,6 +130,27 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
 
         log.error("Invalid challenge : ", e);
+
+        ErrorCode errorCode = e.getErrorCode();
+
+        ErrorResponse errorResponse = ErrorResponse.of(
+                errorCode.getCode(),
+                errorCode.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(errorResponse);
+    }
+
+    // 커스텀 예외 처리
+    @ExceptionHandler(InvalidMissionException.class)
+    public ResponseEntity<ErrorResponse> HandleInvalidMissionException(
+            InvalidMissionException e,
+            HttpServletRequest request) {
+
+        log.error("Invalid mission : ", e);
 
         ErrorCode errorCode = e.getErrorCode();
 
