@@ -1,7 +1,6 @@
 package com.chungnam.eco.mission.service;
 
 import com.chungnam.eco.admin.controller.request.CreateMissionRequest;
-import com.chungnam.eco.common.exception.InvalidMissionException;
 import com.chungnam.eco.mission.domain.Mission;
 import com.chungnam.eco.mission.domain.MissionStatus;
 import com.chungnam.eco.mission.repository.MissionJPARepository;
@@ -28,7 +27,7 @@ public class MissionService {
     @Transactional(readOnly = true)
     public Mission findMissionById(Long missionId) {
         return missionJPARepository.findById(missionId)
-                .orElseThrow(() -> new InvalidMissionException("해당 mission이 존재하지 않습니다. : " + missionId));
+                .orElseThrow(() -> new IllegalArgumentException("해당 mission이 존재하지 않습니다. : " + missionId));
     }
 
     /**
@@ -86,7 +85,7 @@ public class MissionService {
         try {
             return MissionStatus.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new InvalidMissionException("Mission의 잘못된 상태값입니다. : " + status);
+            throw new IllegalArgumentException("Mission의 잘못된 상태값입니다. : " + status);
         }
     }
 
