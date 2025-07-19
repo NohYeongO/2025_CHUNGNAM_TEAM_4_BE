@@ -1,9 +1,7 @@
 package com.chungnam.eco.admin.controller.response;
 
 import com.chungnam.eco.mission.domain.MissionStatus;
-import com.chungnam.eco.mission.domain.MissionType;
 import com.chungnam.eco.mission.service.dto.MissionDto;
-import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,12 +10,10 @@ import lombok.Getter;
 public class MissionMainResponse {
     private final String title;
     private final String description;
-    private final MissionType type;
+    private final String type;
     private final MissionStatus status;
     private final String category;
     private final Integer rewardPoints;
-    private final LocalDateTime createdAt;
-    private final LocalDateTime updatedAt;
 
     /**
      * 미션 생성 성공 시 반환할 응답값
@@ -30,8 +26,6 @@ public class MissionMainResponse {
                 .status(missionDto.getStatus())
                 .category(missionDto.getCategory())
                 .rewardPoints(missionDto.getRewardPoints())
-                .createdAt(missionDto.getCreatedAt())
-                .updatedAt(missionDto.getUpdatedAt())
                 .build();
     }
 }
