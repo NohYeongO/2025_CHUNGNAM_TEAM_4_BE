@@ -5,9 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EqualsAndHashCode(of = "id", callSuper = false)
 @Entity
 @Table(name = "user")
 public class User extends BaseTimeEntity {
@@ -27,10 +26,18 @@ public class User extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    @Builder.Default
     private UserRole role = UserRole.USER;
 
-    @Builder.Default
     @Column(nullable = false)
     private Integer point = 0;
+
+    @Builder
+    public User(Long id, String email, String password, String nickname, UserRole role, Integer point) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.role = role != null ? role : UserRole.USER;
+        this.point = point != null ? point : 0;
+    }
 }
