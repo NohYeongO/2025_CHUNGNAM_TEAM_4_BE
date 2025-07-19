@@ -1,19 +1,24 @@
 package com.chungnam.eco.user.service;
 
 import com.chungnam.eco.config.TestContainerConfig;
-import com.chungnam.eco.mission.domain.MissionStatus;
 import com.chungnam.eco.mission.domain.MissionType;
-import com.chungnam.eco.mission.repository.MissionJPARepository;
+import com.chungnam.eco.mission.domain.UserMissionStatus;
+import com.chungnam.eco.mission.repository.UserMissionJPARepository;
 import com.chungnam.eco.user.controller.response.UserMainResponse;
 import com.chungnam.eco.user.domain.User;
-import com.chungnam.eco.user.domain.UserRole;
 import com.chungnam.eco.user.repository.UserJPARepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.CacheManager;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
@@ -28,22 +33,26 @@ class UserAppServiceCacheTest extends TestContainerConfig {
     @Autowired
     private UserJPARepository userRepository;
 
+    @Autowired
+    @Qualifier("caffeineCacheManager")
+    private CacheManager caffeineCacheManager;
+
+    @Autowired
+    @Qualifier("redisCacheManager")
+    private CacheManager redisCacheManager;
+
     @MockitoBean
-    private MissionJPARepository missionRepository;
+    private UserMissionJPARepository userMissionRepository;
 
     private User testUser;
 
     @BeforeEach
     void setUp() {
-        testUser = User.builder()
-                .nickname("테스트 사용자")
-                .email("test@example.com")
-                .password("password")
-                .role(UserRole.USER)
-                .point(0)
-                .build();
-        testUser = userRepository.save(testUser);
+        caffeineCacheManager.getCacheNames().forEach(cacheName -> Objects.requireNonNull(caffeineCacheManager.getCache(cacheName)).clear());
+        redisCacheManager.getCacheNames().forEach(cacheName -> Objects.requireNonNull(redisCacheManager.getCache(cacheName)).clear());
+        testUser = userRepository.findById(1L).orElse(null);
     }
+
 
     @Test
     @DisplayName("사용자 메인 정보 캐시 테스트 - 같은 사용자 ID로 두 번 호출 시 실제 서비스는 한 번만 호출")
@@ -62,10 +71,10 @@ class UserAppServiceCacheTest extends TestContainerConfig {
         assertThat(firstCall.getUserInfo().getPoint()).isEqualTo(secondCall.getUserInfo().getPoint());
 
         // 캐시가 동작한다면 미션 조회는 각각 한 번씩만 호출되어야 함
-        verify(missionRepository, times(1)).findRandomActiveMissions(
-                MissionType.DAILY.name(), MissionStatus.ACTIVATE.name(), 3);
-        verify(missionRepository, times(1)).findRandomActiveMissions(
-                MissionType.WEEKLY.name(), MissionStatus.ACTIVATE.name(), 2);
+        verify(userMissionRepository, times(1)).findByUserAndMissionTypeAndStatusIn(
+                testUser, MissionType.DAILY, List.of(UserMissionStatus.IN_PROGRESS, UserMissionStatus.SUBMITTED));
+        verify(userMissionRepository, times(1)).findByUserAndMissionTypeAndStatusIn(
+                testUser, MissionType.WEEKLY, List.of(UserMissionStatus.IN_PROGRESS, UserMissionStatus.SUBMITTED));
     }
 
     @Test
@@ -80,10 +89,10 @@ class UserAppServiceCacheTest extends TestContainerConfig {
             userAppService.getUserMainInfo(userId);
         }
 
-        // then - 실제 미션 조회는 첫 번째 호출에서만 실행됨
-        verify(missionRepository, times(1)).findRandomActiveMissions(
-                MissionType.DAILY.name(), MissionStatus.ACTIVATE.name(), 3);
-        verify(missionRepository, times(1)).findRandomActiveMissions(
-                MissionType.WEEKLY.name(), MissionStatus.ACTIVATE.name(), 2);
+        // then
+        verify(userMissionRepository, times(1)).findByUserAndMissionTypeAndStatusIn(
+                testUser, MissionType.DAILY, List.of(UserMissionStatus.IN_PROGRESS, UserMissionStatus.SUBMITTED));
+        verify(userMissionRepository, times(1)).findByUserAndMissionTypeAndStatusIn(
+                testUser, MissionType.WEEKLY, List.of(UserMissionStatus.IN_PROGRESS, UserMissionStatus.SUBMITTED));
     }
 }
