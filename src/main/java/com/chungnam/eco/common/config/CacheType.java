@@ -15,7 +15,12 @@ public enum CacheType {
     // 일일 미션 (Caffeine 캐시 - 자정까지)
     DAILY_MISSIONS("dailyMissions", "local", CacheConfig.getTtlUntilMidnight()),
     // 주간 미션 (Redis 캐시 - 다음 주 일요일 자정까지)
-    WEEKLY_MISSIONS("weeklyMissions", "redis", CacheConfig.getTtlUntilSundayMidnight());
+    WEEKLY_MISSIONS("weeklyMissions", "redis", CacheConfig.getTtlUntilSundayMidnight()),
+    
+    // 랜덤 일일 미션 (Redis 캐시 - 자정까지)
+    RANDOM_DAILY_MISSIONS("randomDailyMissions", "redis", CacheConfig.getTtlUntilMidnight()),
+    // 랜덤 주간 미션 (Redis 캐시 - 다음 주 일요일 자정까지)
+    RANDOM_WEEKLY_MISSIONS("randomWeeklyMissions", "redis", CacheConfig.getTtlUntilSundayMidnight());
 
     private final String cacheName;
     private final String cacheStore;
