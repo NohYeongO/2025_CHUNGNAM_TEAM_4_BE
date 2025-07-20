@@ -1,9 +1,11 @@
 package com.chungnam.eco.user.controller.response;
 
 import com.chungnam.eco.mission.service.dto.MissionDto;
+import com.chungnam.eco.mission.service.dto.UserMissionDto;
 import com.chungnam.eco.user.service.dto.UserInfoDto;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -18,10 +20,10 @@ import java.util.List;
 public class UserMainResponse {
     
     private final UserInfoDto userInfo;
-    private final List<MissionDto> dailyMissions;
-    private final List<MissionDto> weeklyMissions;
+    private final List<UserMissionDto> dailyMissions;
+    private final List<UserMissionDto> weeklyMissions;
 
-    public static UserMainResponse of(UserInfoDto userInfo, List<MissionDto> dailyMissions, List<MissionDto> weeklyMissions) {
+    public static UserMainResponse of(UserInfoDto userInfo, List<UserMissionDto> dailyMissions, List<UserMissionDto> weeklyMissions) {
         return UserMainResponse.builder()
                 .userInfo(userInfo)
                 .dailyMissions(dailyMissions)

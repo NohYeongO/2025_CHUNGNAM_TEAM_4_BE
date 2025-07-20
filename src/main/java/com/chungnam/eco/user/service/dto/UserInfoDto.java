@@ -4,6 +4,7 @@ import com.chungnam.eco.user.domain.User;
 import com.chungnam.eco.user.domain.UserRole;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -19,8 +20,6 @@ public class UserInfoDto {
     private final String nickname;
     private final UserRole role;
     private final Integer point;
-    private final LocalDateTime createdAt;
-    private final LocalDateTime updatedAt;
 
     public static UserInfoDto from(User user) {
         return UserInfoDto.builder()
@@ -29,8 +28,6 @@ public class UserInfoDto {
                 .nickname(user.getNickname())
                 .role(user.getRole())
                 .point(user.getPoint())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
                 .build();
     }
 
