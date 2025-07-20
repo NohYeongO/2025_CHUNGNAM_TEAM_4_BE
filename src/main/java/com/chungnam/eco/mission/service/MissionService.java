@@ -43,6 +43,7 @@ public class MissionService {
                 .description(request.getDescription())
                 .type(request.getType())
                 .category(request.getCategory())
+                .level(request.getLevel())
                 .rewardPoints(request.getRewardPoints())
                 .build();
 
