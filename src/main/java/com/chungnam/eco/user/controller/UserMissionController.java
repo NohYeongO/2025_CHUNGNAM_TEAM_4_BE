@@ -1,23 +1,34 @@
 package com.chungnam.eco.user.controller;
 
+import com.chungnam.eco.common.security.AuthenticationHelper;
+import com.chungnam.eco.user.controller.response.MissionListResponse;
+import com.chungnam.eco.user.controller.response.MissionResponse;
+import com.chungnam.eco.user.service.UserAppService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/missions")
-// TODO: 사용자 미션 관련 API - 임시 TODO 세팅
+@RequiredArgsConstructor
 public class UserMissionController {
 
+    private final UserAppService userAppService;
+
+    /**
+     * 미션 목록 조회 API
+     */
     @GetMapping
-    public ResponseEntity<?> getMissionList(@RequestParam(required = false) String type) {
-        // TODO: 미션 타입에 따른 목록 + 참여 상태 반환
-        return ResponseEntity.ok().build();
+    public ResponseEntity<MissionListResponse> getMissionList() {
+        Long userId = AuthenticationHelper.getCurrentUserId();
+        return ResponseEntity.ok(userAppService.getMissionList(userId));
     }
 
     @GetMapping("/{missionId}")
-    public ResponseEntity<?> getMissionDetail(@PathVariable Long missionId) {
-        // TODO: missionId 기준으로 상세 정보 반환
-        return ResponseEntity.ok().build();
+    public ResponseEntity<MissionResponse> getMissionDetail(@PathVariable Long missionId) {
+        return ResponseEntity.ok(userAppService.getMissionDetail(missionId));
     }
 
     @PostMapping("/{missionId}/start")
