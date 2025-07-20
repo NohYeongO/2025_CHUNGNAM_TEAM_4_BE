@@ -76,4 +76,17 @@ public class Mission extends BaseTimeEntity {
     public void delete() {
         this.status = MissionStatus.DELETE;
     }
+
+    /**
+     * 미션의 값을 수정합니다.
+     */
+    public void edit(String title, MissionType type, String description, MissionLevel level, MissionCategory category,
+                     Integer rewardPoints) {
+        this.title = title;
+        this.type = type;
+        this.description = description;
+        this.category = category;
+        this.rewardPoints = rewardPoints;
+        this.level = level;
+    }
 }

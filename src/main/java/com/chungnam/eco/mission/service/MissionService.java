@@ -1,6 +1,7 @@
 package com.chungnam.eco.mission.service;
 
 import com.chungnam.eco.admin.controller.request.CreateMissionRequest;
+import com.chungnam.eco.admin.controller.request.EditMissionRequest;
 import com.chungnam.eco.mission.domain.Mission;
 import com.chungnam.eco.mission.domain.MissionStatus;
 import com.chungnam.eco.mission.repository.MissionJPARepository;
@@ -103,5 +104,27 @@ public class MissionService {
         return missionList.stream()
                 .map(MissionDto::from)
                 .toList();
+    }
+
+    /**
+     * 미션 수정
+     *
+     * @param missionId          수정할 미션 ID
+     * @param editMissionRequest 수정할 내용을 담은 request
+     * @return 수정후 MissionDTO 변환
+     */
+    @Transactional
+    public MissionDto editMission(Long missionId, EditMissionRequest editMissionRequest) {
+        Mission mission = findMissionById(missionId);
+        mission.edit(
+                editMissionRequest.getTitle(),
+                editMissionRequest.getType(),
+                editMissionRequest.getDescription(),
+                editMissionRequest.getLevel(),
+                editMissionRequest.getCategory(),
+                editMissionRequest.getRewardPoints()
+        );
+
+        return MissionDto.from(mission);
     }
 }

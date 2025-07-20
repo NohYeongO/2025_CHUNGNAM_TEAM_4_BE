@@ -1,6 +1,7 @@
 package com.chungnam.eco.admin.controller;
 
 import com.chungnam.eco.admin.controller.request.CreateMissionRequest;
+import com.chungnam.eco.admin.controller.request.EditMissionRequest;
 import com.chungnam.eco.admin.controller.response.AllMissionResponse;
 import com.chungnam.eco.admin.controller.response.MissionMainResponse;
 import com.chungnam.eco.mission.service.MissionService;
@@ -83,5 +84,21 @@ public class AdminMissionController {
         MissionMainResponse response = MissionMainResponse.success(missionDto);
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 특정 미션을 수정합니다.
+     *
+     * @param missionId          수정할 미션의 ID
+     * @param editMissionRequest 수정할 내용이 담긴 요청 DTO
+     * @return ResponseEntity(MissionMainResponse) 수정된 미션 정보
+     */
+    @PatchMapping("/missions/{missionId}")
+    public ResponseEntity<?> editMission(@PathVariable Long missionId,
+                                         @RequestBody EditMissionRequest editMissionRequest) {
+        MissionDto missionDto = missionService.editMission(missionId, editMissionRequest); // 미션 수정
+        MissionMainResponse response = MissionMainResponse.success(missionDto);
+        return ResponseEntity.ok(response);
+
     }
 }
