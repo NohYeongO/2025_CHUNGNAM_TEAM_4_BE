@@ -14,6 +14,25 @@ public class GlobalExceptionHandler {
     /**
      * UserNotFoundException 처리
      */
+    @ExceptionHandler(MissionNotFoundExcption.class)
+    public ResponseEntity<ErrorResponse> handleMissionNotFoundException(
+            UserNotFoundException e,
+            HttpServletRequest request) {
+
+        ErrorResponse errorResponse = ErrorResponse.of(
+                e.getErrorCode().getCode(),
+                e.getErrorCode().getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(e.getErrorCode().getHttpStatus())
+                .body(errorResponse);
+    }
+
+    /**
+     * UserNotFoundException 처리
+     */
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFoundException(
             UserNotFoundException e,
@@ -23,7 +42,7 @@ public class GlobalExceptionHandler {
 
         ErrorResponse errorResponse = ErrorResponse.of(
                 e.getErrorCode().getCode(),
-                e.getMessage(),
+                e.getErrorCode().getMessage(),
                 request.getRequestURI()
         );
 
