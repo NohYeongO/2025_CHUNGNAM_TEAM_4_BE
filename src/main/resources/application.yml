@@ -1,7 +1,4 @@
 spring:
-  redis:
-    host: localhost
-    prot: 6379
   datasource:
     url: jdbc:mysql://${DB_HOST}:3306/chungnam_thon
     username: ${DB_USERNAME}
