@@ -9,7 +9,6 @@ import com.chungnam.eco.mission.service.dto.MissionDto;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,10 +55,11 @@ public class AdminMissionController {
         return ResponseEntity.ok(response);
     }
 
+
     /**
      * 특정 미션 목록을 조회합니다.
      *
-     * @param status (optional) 조회할 미션 상태 (CREATE, ACTIVATE, DELETE)
+     * @param status (optional) 조회할 미션 상태 (CREATE, ACTIVATE, DELETE) null 이면 전체 조회
      * @return ResponseEntity(AllMissionResponse) 미션 목록
      */
     @GetMapping("/missions")
@@ -77,7 +77,7 @@ public class AdminMissionController {
      * @param missionId 삭제할 미션의 ID
      * @return ResponseEntity(MissionMainResponse) 삭제된 미션 정보
      */
-    @DeleteMapping("/missions/{missionId}")
+    @PatchMapping("/missions/{missionId}/delete")
     public ResponseEntity<?> deleteMission(@PathVariable Long missionId) {
 
         MissionDto missionDto = missionService.deactivateMission(missionId); // Mission status delete로 변경

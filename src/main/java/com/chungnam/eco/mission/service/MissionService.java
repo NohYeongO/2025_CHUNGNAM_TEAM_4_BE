@@ -94,13 +94,22 @@ public class MissionService {
     /**
      * 특정 상태를 기준으로 미션 목록을 조회합니다.
      *
-     * @param status 조회할 상태값 문자열
+     * @param status 조회할 상태값 문자열, null 이면 전체 조회
      * @return 조회된 미션 목록의 DTO 리스트
      */
     @Transactional(readOnly = true)
     public List<MissionDto> findMissionList(String status) {
+
+        if (status == null || status.isBlank()) {
+            // status가 null 또는 공백이면 전체 조회
+            return missionJPARepository.findAll().stream()
+                    .map(MissionDto::from)
+                    .toList();
+        }
+        // status가 있으면 MissionStatus로 변환 후 조건 조회
         MissionStatus missionStatus = toMissionStatus(status);
         List<Mission> missionList = missionJPARepository.findByStatus(missionStatus);
+
         return missionList.stream()
                 .map(MissionDto::from)
                 .toList();
