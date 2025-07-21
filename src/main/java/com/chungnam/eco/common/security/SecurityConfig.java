@@ -51,10 +51,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 공개 API (인증 불필요)
                         .requestMatchers(
-                                "/api/members/check-email",     // 이메일 중복 체크
-                                "/api/members/sign-up",         // 회원가입
-                                "/api/members/sign-in",         // 로그인
-                                "/api/members/find-id"          // 아이디 찾기
+                                "/api/users/check-email",       // 이메일 중복 체크
+                                "/api/users/sign-up",           // 회원가입
+                                "/api/users/sign-in",           // 로그인
+                                "/api/users/find-id",           // 아이디 찾기
+                                "/api/users/reset-password",    // 비밀번호 재설정
+                                "/api/verification/confirm",    // 본인 확인
+                                "/api/auth/refresh"             // 토큰 갱신
                         ).permitAll()
                         
                         // 관리자 API

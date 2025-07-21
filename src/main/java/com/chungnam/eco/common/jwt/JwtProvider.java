@@ -1,6 +1,5 @@
 package com.chungnam.eco.common.jwt;
 
-
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 @Component
@@ -17,27 +18,42 @@ import java.util.Date;
 public class JwtProvider {
 
     private final SecretKey key;
-    private final long expiration;
+    private final long accessTokenExpiration;
+    private final long refreshTokenExpiration;
 
     public JwtProvider(@Value("${jwt.secret}") String secretKey,
-                      @Value("${jwt.expiration}") long expiration) {
+                       @Value("${jwt.access-token-expiration:3600}") long accessTokenExpiration,
+                       @Value("${jwt.refresh-token-expiration:1209600}") long refreshTokenExpiration) { // 14일
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
-        this.expiration = expiration;
+        this.accessTokenExpiration = accessTokenExpiration * 1000; // 초를 밀리초로 변환
+        this.refreshTokenExpiration = refreshTokenExpiration * 1000;
     }
 
     /**
-     * JWT 토큰 생성 (사용자 ID와 권한 포함)
-     * @param userId 사용자 ID
-     * @param role 사용자 권한
-     * @return JWT 토큰 문자열
+     * Access Token 생성 (1시간 유효)
      */
     public String generateAccessToken(Long userId, String role) {
+        return generateToken(userId, role, accessTokenExpiration, "ACCESS");
+    }
+
+    /**
+     * Refresh Token 생성 (14일 유효)
+     */
+    public String generateRefreshToken(Long userId, String role) {
+        return generateToken(userId, role, refreshTokenExpiration, "REFRESH");
+    }
+
+    /**
+     * 공통 토큰 생성 메서드
+     */
+    private String generateToken(Long userId, String role, long expiration, String tokenType) {
         Instant now = Instant.now();
         Instant expiry = now.plusMillis(expiration);
 
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("role", role)
+                .claim("type", tokenType)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiry))
                 .signWith(key)
@@ -45,29 +61,39 @@ public class JwtProvider {
     }
 
     /**
-     * 사용자 정보로 리프레시 토큰 발급
-     * @param userId 토큰에 포함할 userId
-     * @param role 사용자 권한
-     * @return JWT 리프레시 토큰(문자열)
+     * Refresh Token의 만료 시간을 LocalDateTime으로 반환
      */
-    public String createRefreshToken(Long userId, String role) {
-        Instant now = Instant.now();
-        Instant expiry = now.plusMillis(expiration);
+    public LocalDateTime getRefreshTokenExpiryDate() {
+        return LocalDateTime.now().plusSeconds(refreshTokenExpiration / 1000);
+    }
 
-        return Jwts.builder()
-                .subject(String.valueOf(userId))
-                .claim("role", role)
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(expiry))
-                .signWith(key)
-                .compact();
+    /**
+     * JWT 토큰 유효성 검증
+     */
+    public boolean validateToken(String token) {
+        try {
+            getClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            log.debug("Invalid JWT token: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 토큰 타입 확인 (ACCESS or REFRESH)
+     */
+    public String getTokenType(String token) {
+        try {
+            return getClaims(token).get("type", String.class);
+        } catch (JwtException e) {
+            log.error("Invalid JWT token: {}", e.getMessage());
+            throw e;
+        }
     }
 
     /**
      * JWT 토큰에서 Claims 추출
-     *
-     * @param token JWT 토큰
-     * @return Claims 객체
      */
     private Claims getClaims(String token) {
         return Jwts.parser()
@@ -79,10 +105,6 @@ public class JwtProvider {
 
     /**
      * JWT 토큰에서 사용자 ID 추출
-     *
-     * @param token JWT 토큰 (Bearer 접두사 제거된 순수 토큰)
-     * @return 사용자 ID (Long)
-     * @throws JwtException 토큰이 유효하지 않은 경우
      */
     public Long getUserId(String token) {
         try {
@@ -98,10 +120,6 @@ public class JwtProvider {
 
     /**
      * JWT 토큰에서 사용자 권한 추출
-     *
-     * @param token JWT 토큰 (Bearer 접두사 제거된 순수 토큰)
-     * @return 사용자 권한 (String)
-     * @throws JwtException 토큰이 유효하지 않은 경우
      */
     public String getUserRole(String token) {
         try {
