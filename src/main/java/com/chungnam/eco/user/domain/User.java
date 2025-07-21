@@ -40,4 +40,28 @@ public class User extends BaseTimeEntity {
         this.role = role != null ? role : UserRole.USER;
         this.point = point != null ? point : 0;
     }
+
+    /**
+     * 비밀번호 변경
+     */
+    public void changePassword(String newEncodedPassword) {
+        this.password = newEncodedPassword;
+    }
+
+    /**
+     * 포인트 추가
+     */
+    public void addPoint(int points) {
+        this.point += points;
+    }
+
+    /**
+     * 포인트 차감
+     */
+    public void deductPoint(int points) {
+        if (this.point < points) {
+            throw new IllegalArgumentException("보유 포인트가 부족합니다.");
+        }
+        this.point -= points;
+    }
 }
