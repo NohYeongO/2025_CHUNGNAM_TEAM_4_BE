@@ -8,10 +8,12 @@ import lombok.Getter;
 @Getter
 @Builder
 public class MissionMainResponse {
+    private final Long id;
     private final String title;
     private final String description;
     private final String type;
     private final MissionStatus status;
+    private final String level;
     private final String category;
     private final Integer rewardPoints;
 
@@ -20,10 +22,12 @@ public class MissionMainResponse {
      */
     public static MissionMainResponse success(MissionDto missionDto) {
         return MissionMainResponse.builder()
+                .id(missionDto.getId())
                 .title(missionDto.getTitle())
                 .description(missionDto.getDescription())
                 .type(missionDto.getType())
                 .status(missionDto.getStatus())
+                .level(missionDto.getLevel())
                 .category(missionDto.getCategory())
                 .rewardPoints(missionDto.getRewardPoints())
                 .build();

@@ -5,20 +5,19 @@ import com.chungnam.eco.mission.domain.MissionStatus;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 /**
  * 미션 DTO (Mission 엔티티와 1:1 매핑)
  */
 @Getter
 @Builder
 public class MissionDto {
-    
+
     private final Long id;
     private final String title;
     private final String description;
     private final String type;
     private final MissionStatus status;
+    private final String level;
     private final String category;
     private final Integer rewardPoints;
 
@@ -31,6 +30,7 @@ public class MissionDto {
                 .title(mission.getTitle())
                 .description(mission.getDescription())
                 .type(mission.getType().name())
+                .level(mission.getLevel().getDescription())
                 .status(mission.getStatus())
                 .category(mission.getCategory().getDescription())
                 .rewardPoints(mission.getRewardPoints())

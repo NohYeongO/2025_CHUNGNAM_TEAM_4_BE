@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CreateMissionRequest {
+public class EditMissionRequest {
     @NotBlank(message = "제목을 입력해주세요.")
     private String title;
 
@@ -28,3 +28,4 @@ public class CreateMissionRequest {
     @NotBlank(message = "보상을 입력해주세요.")
     private Integer rewardPoints;
 }
+

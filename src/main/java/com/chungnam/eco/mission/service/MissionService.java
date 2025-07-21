@@ -1,6 +1,7 @@
 package com.chungnam.eco.mission.service;
 
 import com.chungnam.eco.admin.controller.request.CreateMissionRequest;
+import com.chungnam.eco.admin.controller.request.EditMissionRequest;
 import com.chungnam.eco.mission.domain.Mission;
 import com.chungnam.eco.mission.domain.MissionStatus;
 import com.chungnam.eco.mission.repository.MissionJPARepository;
@@ -43,6 +44,7 @@ public class MissionService {
                 .description(request.getDescription())
                 .type(request.getType())
                 .category(request.getCategory())
+                .level(request.getLevel())
                 .rewardPoints(request.getRewardPoints())
                 .build();
 
@@ -92,15 +94,46 @@ public class MissionService {
     /**
      * 특정 상태를 기준으로 미션 목록을 조회합니다.
      *
-     * @param status 조회할 상태값 문자열
+     * @param status 조회할 상태값 문자열, null 이면 전체 조회
      * @return 조회된 미션 목록의 DTO 리스트
      */
     @Transactional(readOnly = true)
     public List<MissionDto> findMissionList(String status) {
+
+        if (status == null || status.isBlank()) {
+            // status가 null 또는 공백이면 전체 조회
+            return missionJPARepository.findAll().stream()
+                    .map(MissionDto::from)
+                    .toList();
+        }
+        // status가 있으면 MissionStatus로 변환 후 조건 조회
         MissionStatus missionStatus = toMissionStatus(status);
         List<Mission> missionList = missionJPARepository.findByStatus(missionStatus);
+
         return missionList.stream()
                 .map(MissionDto::from)
                 .toList();
+    }
+
+    /**
+     * 미션 수정
+     *
+     * @param missionId          수정할 미션 ID
+     * @param editMissionRequest 수정할 내용을 담은 request
+     * @return 수정후 MissionDTO 변환
+     */
+    @Transactional
+    public MissionDto editMission(Long missionId, EditMissionRequest editMissionRequest) {
+        Mission mission = findMissionById(missionId);
+        mission.edit(
+                editMissionRequest.getTitle(),
+                editMissionRequest.getType(),
+                editMissionRequest.getDescription(),
+                editMissionRequest.getLevel(),
+                editMissionRequest.getCategory(),
+                editMissionRequest.getRewardPoints()
+        );
+
+        return MissionDto.from(mission);
     }
 }

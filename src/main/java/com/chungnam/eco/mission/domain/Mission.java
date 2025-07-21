@@ -1,15 +1,26 @@
 package com.chungnam.eco.mission.domain;
 
 import com.chungnam.eco.common.entity.BaseTimeEntity;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "mission")
 public class Mission extends BaseTimeEntity {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,6 +41,10 @@ public class Mission extends BaseTimeEntity {
     private MissionStatus status;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "level", nullable = false, length = 20)
+    private MissionLevel level;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false, length = 30)
     private MissionCategory category;
 
@@ -37,10 +52,12 @@ public class Mission extends BaseTimeEntity {
     private Integer rewardPoints;
 
     @Builder
-    public Mission(String title, String description, MissionType type, MissionCategory category, Integer rewardPoints) {
+    public Mission(String title, String description, MissionType type, MissionLevel level, MissionCategory category,
+                   Integer rewardPoints) {
         this.title = title;
         this.description = description;
         this.type = type;
+        this.level = level;
         this.category = category;
         this.status = MissionStatus.CREATE; // 생성으로 초기화
         this.rewardPoints = rewardPoints;
@@ -58,5 +75,18 @@ public class Mission extends BaseTimeEntity {
      */
     public void delete() {
         this.status = MissionStatus.DELETE;
+    }
+
+    /**
+     * 미션의 값을 수정합니다.
+     */
+    public void edit(String title, MissionType type, String description, MissionLevel level, MissionCategory category,
+                     Integer rewardPoints) {
+        this.title = title;
+        this.type = type;
+        this.description = description;
+        this.category = category;
+        this.rewardPoints = rewardPoints;
+        this.level = level;
     }
 }

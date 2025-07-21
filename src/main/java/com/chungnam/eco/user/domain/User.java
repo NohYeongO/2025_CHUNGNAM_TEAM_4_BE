@@ -1,8 +1,19 @@
 package com.chungnam.eco.user.domain;
 
 import com.chungnam.eco.common.entity.BaseTimeEntity;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -63,5 +74,14 @@ public class User extends BaseTimeEntity {
             throw new IllegalArgumentException("보유 포인트가 부족합니다.");
         }
         this.point -= points;
+    }
+
+     * 포인트 지급 메서드
+     *
+     * @param point 제공할 포인트
+     * @return User
+     */
+    public void SupplyPoint(Integer point) {
+        this.point += point;
     }
 }
