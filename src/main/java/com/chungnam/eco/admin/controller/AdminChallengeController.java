@@ -33,7 +33,7 @@ public class AdminChallengeController {
      * @return 상태에 따른 Challenge 목록
      */
     @GetMapping("/challenges")
-    public ResponseEntity<?> getMissionAuthList(
+    public ResponseEntity<AllChallengeResponse> getMissionAuthList(
             @RequestParam(required = false) String status,
             @PageableDefault(size = 10, page = 0, sort = "startedAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
@@ -52,7 +52,7 @@ public class AdminChallengeController {
      * @return Challenge 상세 정보와 이미지 목록
      */
     @GetMapping("/challenges/{challengeId}")
-    public ResponseEntity<?> getChallengeDetail(@PathVariable Long challengeId) {
+    public ResponseEntity<ChallengeDetailResponse> getChallengeDetail(@PathVariable Long challengeId) {
         ChallengeDto challengeDto = adminChallengeService.getChallenge(challengeId);
 
         List<String> challengeImageList = adminChallengeService.getChallengeImages(challengeId);
