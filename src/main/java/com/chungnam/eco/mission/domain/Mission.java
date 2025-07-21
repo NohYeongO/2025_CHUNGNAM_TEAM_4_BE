@@ -73,7 +73,7 @@ public class Mission extends BaseTimeEntity {
     /**
      * 미션을 삭제 상태로 변경합니다.
      */
-    public void delete() {
+    public void disable() {
         this.status = MissionStatus.DELETE;
     }
 
