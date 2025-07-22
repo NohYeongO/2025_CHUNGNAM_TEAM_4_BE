@@ -2,26 +2,32 @@ package com.chungnam.eco.common.exception;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     /**
-     * UserNotFoundException 처리
+     * MissionNotFoundExcption 처리
      */
     @ExceptionHandler(MissionNotFoundExcption.class)
     public ResponseEntity<ErrorResponse> handleMissionNotFoundException(
-            UserNotFoundException e,
+            MissionNotFoundExcption e,
             HttpServletRequest request) {
+
+        log.warn("Mission not found: {}", e.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.of(
                 e.getErrorCode().getCode(),
-                e.getErrorCode().getMessage(),
+                e.getMessage(),
                 request.getRequestURI()
         );
 
@@ -42,7 +48,7 @@ public class GlobalExceptionHandler {
 
         ErrorResponse errorResponse = ErrorResponse.of(
                 e.getErrorCode().getCode(),
-                e.getErrorCode().getMessage(),
+                e.getMessage(),
                 request.getRequestURI()
         );
 
@@ -119,28 +125,7 @@ public class GlobalExceptionHandler {
                 .body(errorResponse);
     }
 
-    /**
-     * 모든 예외를 처리하는 핸들러 (예시)
-     *
-     * @return ResponseEntity<ErrorResponse>
-     */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(
-            Exception e,
-            HttpServletRequest request) {
 
-        log.error("Unexpected error occurred: ", e);
-
-        ErrorResponse errorResponse = ErrorResponse.of(
-                ErrorCode.INTERNAL_SERVER_ERROR.getCode(),
-                ErrorCode.INTERNAL_SERVER_ERROR.getMessage(),
-                request.getRequestURI()
-        );
-
-        return ResponseEntity
-                .status(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus())
-                .body(errorResponse);
-    }
 
     // 커스텀 예외 처리
     @ExceptionHandler(InvalidChallengeException.class)
@@ -148,7 +133,7 @@ public class GlobalExceptionHandler {
             InvalidChallengeException e,
             HttpServletRequest request) {
 
-        log.error("Invalid challenge : ", e);
+        log.warn("Invalid challenge : ", e);
 
         ErrorCode errorCode = e.getErrorCode();
 
@@ -169,7 +154,7 @@ public class GlobalExceptionHandler {
             InvalidMissionException e,
             HttpServletRequest request) {
 
-        log.error("Invalid mission : ", e);
+        log.warn("Invalid mission : ", e);
 
         ErrorCode errorCode = e.getErrorCode();
 
@@ -183,4 +168,169 @@ public class GlobalExceptionHandler {
                 .status(errorCode.getHttpStatus())
                 .body(errorResponse);
     }
+
+    /**
+     * ImageUploadException 처리
+     */
+    @ExceptionHandler(ImageUploadException.class)
+    public ResponseEntity<ErrorResponse> handleImageUploadException(
+            ImageUploadException e,
+            HttpServletRequest request) {
+
+        log.warn("Image upload failed: {}", e.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.of(
+                e.getErrorCode().getCode(),
+                e.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(e.getErrorCode().getHttpStatus())
+                .body(errorResponse);
+    }
+
+    /**
+     * InvalidMissionStatusException 처리
+     */
+    @ExceptionHandler(InvalidMissionStatusException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidMissionStatusException(
+            InvalidMissionStatusException e,
+            HttpServletRequest request) {
+
+        log.warn("Invalid mission status: {}", e.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.of(
+                e.getErrorCode().getCode(),
+                e.getMessage() != null ? e.getMessage() : e.getErrorCode().getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(e.getErrorCode().getHttpStatus())
+                .body(errorResponse);
+    }
+
+    /**
+     * DataIntegrityException 처리
+     */
+    @ExceptionHandler(DataIntegrityException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityException(
+            DataIntegrityException e,
+            HttpServletRequest request) {
+
+        log.warn("Data integrity violation: {}", e.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.of(
+                e.getErrorCode().getCode(),
+                e.getMessage() != null ? e.getMessage() : e.getErrorCode().getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(e.getErrorCode().getHttpStatus())
+                                 .body(errorResponse);
+     }
+
+     /**
+      * MissingServletRequestPartException 처리 (@RequestPart 누락)
+      */
+     @ExceptionHandler(MissingServletRequestPartException.class)
+     public ResponseEntity<ErrorResponse> handleMissingServletRequestPartException(
+             MissingServletRequestPartException e,
+             HttpServletRequest request) {
+
+         log.warn("Missing request part: {}", e.getMessage());
+
+         ErrorResponse errorResponse = ErrorResponse.of(
+                 ErrorCode.INVALID_REQUEST.getCode(),
+                 "필수 요청 부분이 누락되었습니다: " + e.getRequestPartName(),
+                 request.getRequestURI()
+         );
+
+         return ResponseEntity
+                 .status(ErrorCode.INVALID_REQUEST.getHttpStatus())
+                 .body(errorResponse);
+     }
+
+     /**
+      * MethodArgumentNotValidException 처리 (@Valid 검증 실패)
+      */
+     @ExceptionHandler(MethodArgumentNotValidException.class)
+     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
+             MethodArgumentNotValidException e,
+             HttpServletRequest request) {
+
+         log.warn("Validation failed: {}", e.getMessage());
+
+         // 첫 번째 validation 오류 메시지 추출
+         String errorMessage = e.getBindingResult()
+                 .getFieldErrors()
+                 .stream()
+                 .findFirst()
+                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                 .orElse("입력값이 올바르지 않습니다.");
+
+         ErrorResponse errorResponse = ErrorResponse.of(
+                 ErrorCode.INVALID_REQUEST.getCode(),
+                 errorMessage,
+                 request.getRequestURI()
+         );
+
+         return ResponseEntity
+                 .status(ErrorCode.INVALID_REQUEST.getHttpStatus())
+                 .body(errorResponse);
+     }
+
+     /**
+      * ConstraintViolationException 처리 (@NotNull, @Size 등 개별 constraint 검증 실패)
+      */
+     @ExceptionHandler(ConstraintViolationException.class)
+     public ResponseEntity<ErrorResponse> handleConstraintViolationException(
+             ConstraintViolationException e,
+             HttpServletRequest request) {
+
+         log.warn("Constraint violation: {}", e.getMessage());
+
+         // 첫 번째 constraint violation 메시지 추출
+         String errorMessage = e.getConstraintViolations()
+                 .stream()
+                 .findFirst()
+                 .map(violation -> violation.getMessage())
+                 .orElse("제약 조건을 위반했습니다.");
+
+         ErrorResponse errorResponse = ErrorResponse.of(
+                 ErrorCode.INVALID_REQUEST.getCode(),
+                 errorMessage,
+                 request.getRequestURI()
+         );
+
+         return ResponseEntity
+                 .status(ErrorCode.INVALID_REQUEST.getHttpStatus())
+                 .body(errorResponse);
+     }
+
+     /**
+      * 모든 예외를 처리하는 핸들러
+      *
+      * @return ResponseEntity<ErrorResponse>
+      */
+     @ExceptionHandler(Exception.class)
+     public ResponseEntity<ErrorResponse> handleException(
+             Exception e,
+             HttpServletRequest request) {
+
+         log.warn("Unexpected error occurred: ", e);
+
+         ErrorResponse errorResponse = ErrorResponse.of(
+                 ErrorCode.INTERNAL_SERVER_ERROR.getCode(),
+                 ErrorCode.INTERNAL_SERVER_ERROR.getMessage(),
+                 request.getRequestURI()
+         );
+
+         return ResponseEntity
+                 .status(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus())
+                 .body(errorResponse);
+     }
 }
+ 
