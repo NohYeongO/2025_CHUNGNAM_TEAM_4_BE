@@ -45,6 +45,9 @@ dependencies {
     // HTTP Client for Discord webhook
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // Azure Blob Storage
+    implementation 'com.azure:azure-storage-blob:12.25.1'
+
     // Lombok (메인 코드에만)
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
