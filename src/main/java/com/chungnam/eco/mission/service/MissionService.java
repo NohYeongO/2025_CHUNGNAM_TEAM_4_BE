@@ -75,7 +75,7 @@ public class MissionService {
     @Transactional
     public MissionDto deactivateMission(Long missionId) {
         Mission mission = findMissionById(missionId);
-        mission.delete(); // 미션 삭제
+        mission.disable(); // 미션 비활성화
         return MissionDto.from(mission);
     }
 

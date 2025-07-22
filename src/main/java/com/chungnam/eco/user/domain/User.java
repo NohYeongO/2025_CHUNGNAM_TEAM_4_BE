@@ -75,13 +75,4 @@ public class User extends BaseTimeEntity {
         }
         this.point -= points;
     }
-
-     * 포인트 지급 메서드
-     *
-     * @param point 제공할 포인트
-     * @return User
-     */
-    public void SupplyPoint(Integer point) {
-        this.point += point;
-    }
 }

@@ -31,7 +31,7 @@ public class AdminMissionController {
      * @return ResponseEntity(MissionMainResponse) 생성된 미션 정보
      */
     @PostMapping("/missions")
-    public ResponseEntity<?> createMission(@RequestBody CreateMissionRequest createMissionRequest) {
+    public ResponseEntity<MissionMainResponse> createMission(@RequestBody CreateMissionRequest createMissionRequest) {
 
         MissionDto missionDto = missionService.creatMission(createMissionRequest); // MissionDto 생성
         MissionMainResponse response = MissionMainResponse.success(missionDto);
@@ -47,7 +47,7 @@ public class AdminMissionController {
      */
 
     @PatchMapping("/missions/{missionId}/activate")
-    public ResponseEntity<?> activateMission(@PathVariable Long missionId) {
+    public ResponseEntity<MissionMainResponse> activateMission(@PathVariable Long missionId) {
 
         MissionDto missionDto = missionService.activateMission(missionId); // Mission status activate로 변경
         MissionMainResponse response = MissionMainResponse.success(missionDto);
@@ -63,7 +63,7 @@ public class AdminMissionController {
      * @return ResponseEntity(AllMissionResponse) 미션 목록
      */
     @GetMapping("/missions")
-    public ResponseEntity<?> getAllMissions(@RequestParam(required = false) String status) {
+    public ResponseEntity<AllMissionResponse> getAllMissions(@RequestParam(required = false) String status) {
 
         List<MissionDto> missionDtoList = missionService.findMissionList(status); // 상태값으로 미션 조회
         AllMissionResponse response = AllMissionResponse.success(missionDtoList);
@@ -78,7 +78,7 @@ public class AdminMissionController {
      * @return ResponseEntity(MissionMainResponse) 삭제된 미션 정보
      */
     @PatchMapping("/missions/{missionId}/delete")
-    public ResponseEntity<?> deleteMission(@PathVariable Long missionId) {
+    public ResponseEntity<MissionMainResponse> deleteMission(@PathVariable Long missionId) {
 
         MissionDto missionDto = missionService.deactivateMission(missionId); // Mission status delete로 변경
         MissionMainResponse response = MissionMainResponse.success(missionDto);
@@ -94,8 +94,8 @@ public class AdminMissionController {
      * @return ResponseEntity(MissionMainResponse) 수정된 미션 정보
      */
     @PatchMapping("/missions/{missionId}")
-    public ResponseEntity<?> editMission(@PathVariable Long missionId,
-                                         @RequestBody EditMissionRequest editMissionRequest) {
+    public ResponseEntity<MissionMainResponse> editMission(@PathVariable Long missionId,
+                                                           @RequestBody EditMissionRequest editMissionRequest) {
         MissionDto missionDto = missionService.editMission(missionId, editMissionRequest); // 미션 수정
         MissionMainResponse response = MissionMainResponse.success(missionDto);
         return ResponseEntity.ok(response);

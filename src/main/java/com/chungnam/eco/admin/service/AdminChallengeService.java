@@ -6,8 +6,10 @@ import com.chungnam.eco.challenge.domain.ChallengeImage;
 import com.chungnam.eco.challenge.domain.ChallengeStatus;
 import com.chungnam.eco.challenge.repository.ChallengeImageJPARepository;
 import com.chungnam.eco.challenge.repository.ChallengeJPARepository;
+import com.chungnam.eco.common.exception.UserNotFoundException;
 import com.chungnam.eco.mission.domain.Mission;
 import com.chungnam.eco.user.domain.User;
+import com.chungnam.eco.user.repository.UserJPARepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,7 @@ public class AdminChallengeService {
 
     private final ChallengeJPARepository challengeJPARepository;
     private final ChallengeImageJPARepository challengeImageJPARepository;
+    private final UserJPARepository userJPARepository;
 
     /**
      * 챌린지를 ID로 조회합니다.
@@ -109,6 +112,14 @@ public class AdminChallengeService {
                 .toList();
     }
 
+    @Transactional
+    public void supplyPoint(Long userId, Integer point) {
+        User user = userJPARepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found. : " + userId));
+
+        user.addPoint(point);
+    }
+
     /**
      * 특정 챌린지를 승인 처리합니다. 챌린지의 상태를 COMPLETED로 변경하고, 유저에게 포인트를 지급합니다.
      *
@@ -121,7 +132,8 @@ public class AdminChallengeService {
         User user = challenge.getUser();
         Mission mission = challenge.getMission();
         Integer point = mission.getRewardPoints();
-        user.SupplyPoint(point);
+
+        supplyPoint(user.getId(), point);
 
         challenge.setCompleted();
     }
