@@ -32,3 +32,10 @@ discord:
 logging:
   config: classpath:logback-spring.xml
 
+# Azure Blob Storage 설정
+azure:
+  storage:
+    account-name: ${AZURE_STORAGE_ACCOUNT_NAME}
+    account-key: ${AZURE_STORAGE_ACCOUNT_KEY}
+    container-name: ${AZURE_STORAGE_CONTAINER_NAME}
+    sas-token: ${AZURE_STORAGE_SAS_TOKEN}
