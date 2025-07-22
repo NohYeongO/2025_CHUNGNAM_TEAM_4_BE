@@ -23,6 +23,8 @@ redis:
   main:
     host: localhost
     port: 6379
+    password: ""  # TestContainers Redis는 password 없음
+    ssl: false    # TestContainers Redis는 SSL 없음
 
 # JWT 테스트 설정
 jwt:

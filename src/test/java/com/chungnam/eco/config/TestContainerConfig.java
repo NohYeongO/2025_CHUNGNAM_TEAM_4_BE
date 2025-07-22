@@ -41,6 +41,8 @@ public abstract class TestContainerConfig {
         // Redis 설정
         registry.add("redis.main.host", () -> redis.getHost());
         registry.add("redis.main.port", () -> redis.getMappedPort(6379));
+        registry.add("redis.main.password", () -> ""); // 빈 password
+        registry.add("redis.main.ssl", () -> "false"); // SSL 비활성화
 
         // JWT 테스트 설정
         registry.add("jwt.secret", () -> "dGVzdFNlY3JldEtleUZvckpXVFRva2VuVGVzdEVudmlyb25tZW50MTIzNDU2Nzg5MA==");

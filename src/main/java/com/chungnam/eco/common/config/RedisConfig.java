@@ -27,11 +27,23 @@ public class RedisConfig {
     @Value("${redis.main.password:}")
     private String redisPassword;
 
+    @Value("${redis.main.ssl:true}")
+    private boolean useSSL;
+
     @Bean(name = "redisConnectionFactory")
     public LettuceConnectionFactory redisConnectionFactory() {
-        LettuceClientConfiguration clientConfiguration = LettuceClientConfiguration.builder()
-                .useSsl()
-                .build();
+        LettuceClientConfiguration clientConfiguration;
+        
+        if (useSSL) {
+            // 운영환경: SSL 사용
+            clientConfiguration = LettuceClientConfiguration.builder()
+                    .useSsl()
+                    .build();
+        } else {
+            // 테스트환경: SSL 사용 안함
+            clientConfiguration = LettuceClientConfiguration.builder()
+                    .build();
+        }
 
         RedisStandaloneConfiguration serverConfiguration = new RedisStandaloneConfiguration(redisHost, redisPort);
         serverConfiguration.setPassword(redisPassword);

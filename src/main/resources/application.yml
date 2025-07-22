@@ -17,7 +17,8 @@ redis:
   main:
     host: ${REDIS_MAIN_HOST:localhost}
     port: ${REDIS_MAIN_PORT:6379}
-    password: ${REDIS_MAIN_PASSWORD}
+    password: ${REDIS_MAIN_PASSWORD:Test}
+    ssl: true  # Azure Redis Cache는 SSL 필수
 
 # JWT 설정 (토큰 만료 시간을 초 단위로 설정)
 jwt:
