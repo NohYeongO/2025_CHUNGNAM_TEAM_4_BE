@@ -62,11 +62,10 @@ public class Challenge extends BaseTimeEntity {
     /**
      * 챌린지 승인 요청 상태로 전환합니다.
      *
-     * @param description 승인 요청 시 제출한 설명
      */
-    public void setPending(String description) {
+    public void submitCompleted(String submissionText) {
         this.challengeStatus = ChallengeStatus.PENDING; // 미션 승인 요청
-        this.submissionText = description; // 미션 완료 후 설명글 추가
+        this.submissionText = submissionText; // 미션 완료 후 설명글 추가
     }
 
     /**
@@ -79,7 +78,6 @@ public class Challenge extends BaseTimeEntity {
         this.submissionText = rejectionReason; // 거절 사유 추가
     }
 
-
     /**
      * 지정한 시각에 챌린지를 완료 상태로 전환합니다.
      */
@@ -87,5 +85,4 @@ public class Challenge extends BaseTimeEntity {
         this.completedAt = LocalDateTime.now();
         this.challengeStatus = ChallengeStatus.COMPLETED; // 미션 완료
     }
-
 }
