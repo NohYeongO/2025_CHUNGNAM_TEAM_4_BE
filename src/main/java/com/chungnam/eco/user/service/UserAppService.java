@@ -1,13 +1,12 @@
 package com.chungnam.eco.user.service;
 
 import com.chungnam.eco.mission.service.UserFindMissionService;
-import com.chungnam.eco.mission.service.UserMissionSaveService;
-import com.chungnam.eco.mission.service.dto.MissionDto;
 import com.chungnam.eco.mission.service.dto.UserMissionDto;
 import com.chungnam.eco.user.controller.response.MissionListResponse;
 import com.chungnam.eco.user.controller.response.MissionResponse;
 import com.chungnam.eco.user.controller.response.UserMainResponse;
 import com.chungnam.eco.user.service.dto.*;
+import com.chungnam.eco.user.service.result.MissionProcessResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -45,33 +44,29 @@ public class UserAppService {
      */
     public MissionListResponse getMissionList(Long userId) {
         UserInfoDto userInfo = UserInfoDto.from(userAuthService.getUserById(userId));
-        
+
         List<UserMissionDto> existingDailyMissions = userFindMissionService.getDailyMissions(userInfo);
-        List<UserMissionDto> existingWeeklyMissions = userFindMissionService.getWeeklyMissions(userInfo);
-        
         boolean dailySelected = !existingDailyMissions.isEmpty();
-        List<MissionDto> dailyMissions;
-        
-        if (dailySelected) {
-            dailyMissions = existingDailyMissions.stream()
-                    .map(UserMissionDto::getMissionDto)
-                    .toList();
-        } else {
-            dailyMissions = userFindMissionService.getRandomDailyMissions(userId);
-        }
-        
+
+        MissionProcessResult dailyResult = dailySelected
+                ? MissionProcessResult.selected(existingDailyMissions)
+                : MissionProcessResult.notSelected(userFindMissionService.getRandomDailyMissions(userId));
+
+        List<UserMissionDto> existingWeeklyMissions = userFindMissionService.getWeeklyMissions(userInfo);
         boolean weeklySelected = !existingWeeklyMissions.isEmpty();
-        List<MissionDto> weeklyMissions;
-        
-        if (weeklySelected) {
-            weeklyMissions = existingWeeklyMissions.stream()
-                    .map(UserMissionDto::getMissionDto)
-                    .toList();
-        } else {
-            weeklyMissions = userFindMissionService.getRandomWeeklyMissions(userId);
-        }
-        
-        return MissionListResponse.of(dailySelected, weeklySelected, dailyMissions, weeklyMissions);
+
+        MissionProcessResult weeklyResult = weeklySelected
+                ? MissionProcessResult.selected(existingWeeklyMissions)
+                : MissionProcessResult.notSelected(userFindMissionService.getRandomWeeklyMissions(userId));
+
+        return MissionListResponse.of(
+            dailyResult.selected(), 
+            weeklyResult.selected(),
+            dailyResult.existingMissions(), 
+            weeklyResult.existingMissions(), 
+            dailyResult.randomMissions(), 
+            weeklyResult.randomMissions()
+        );
     }
 
     public MissionResponse getMissionDetail(Long missionId) {
