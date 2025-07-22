@@ -1,15 +1,25 @@
 package com.chungnam.eco.user.service;
 
+import com.chungnam.eco.challenge.service.ChallengeSubmitService;
+import com.chungnam.eco.challenge.service.dto.ChallengeDto;
+import com.chungnam.eco.common.exception.DataIntegrityException;
+import com.chungnam.eco.common.exception.ImageUploadException;
+import com.chungnam.eco.common.exception.InvalidMissionStatusException;
+import com.chungnam.eco.common.storage.AzureBlobStorageService;
+import com.chungnam.eco.common.storage.ImageUploadDto;
 import com.chungnam.eco.mission.service.UserFindMissionService;
+import com.chungnam.eco.mission.service.UserMissionSaveService;
 import com.chungnam.eco.mission.service.dto.UserMissionDto;
 import com.chungnam.eco.user.controller.response.MissionListResponse;
 import com.chungnam.eco.user.controller.response.MissionResponse;
+import com.chungnam.eco.user.controller.response.MissionSubmitResponse;
 import com.chungnam.eco.user.controller.response.UserMainResponse;
 import com.chungnam.eco.user.service.dto.*;
 import com.chungnam.eco.user.service.result.MissionProcessResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,6 +30,9 @@ public class UserAppService {
 
     private final UserAuthService userAuthService;
     private final UserFindMissionService userFindMissionService;
+    private final AzureBlobStorageService azureBlobStorageService;
+    private final ChallengeSubmitService challengeSubmitService;
+    private final UserMissionSaveService userMissionSaveService;
 
     /**
      * 사용자 메인 정보 조회 서비스 (controller, service 중간계츨 - UserAppService)
@@ -71,5 +84,24 @@ public class UserAppService {
 
     public MissionResponse getMissionDetail(Long missionId) {
         return MissionResponse.from(userFindMissionService.getMissionDetail(missionId));
+    }
+
+    public MissionSubmitResponse submitMission(Long userId, Long userMissionId, String description, List<MultipartFile> images) {
+        ChallengeDto tempChallenge = null;
+        try {
+            UserInfoDto userInfo = UserInfoDto.from(userAuthService.getUserById(userId));
+            tempChallenge = challengeSubmitService.createTempChallenge(userInfo, userMissionId);
+            List<ImageUploadDto> ImageUploadDto = azureBlobStorageService.uploadImages(images);
+            Long challengeId = challengeSubmitService.completeMissionSubmit(tempChallenge, ImageUploadDto, description);
+            userMissionSaveService.submitMissionStatusUpdate(userMissionId);
+            return MissionSubmitResponse.success(challengeId);
+        } catch (InvalidMissionStatusException e){
+           throw new InvalidMissionStatusException();
+        } catch (ImageUploadException | DataIntegrityException e){
+            if (tempChallenge != null){
+                challengeSubmitService.deleteTempChallenge(tempChallenge);
+            }
+            throw new ImageUploadException(e.getMessage());
+        }
     }
 }
