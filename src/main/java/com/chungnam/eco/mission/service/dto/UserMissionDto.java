@@ -9,14 +9,14 @@ import lombok.Getter;
 @Builder
 public class UserMissionDto {
     private Long userMissionId;
-    private MissionDto missionDto;
+    private MissionDto mission;
     private String missionType; // "DAILY" 또는 "WEEKLY"
     private UserMissionStatus userMissionStatus;
 
     public static UserMissionDto from(UserMission userMission) {
         return UserMissionDto.builder()
                 .userMissionId(userMission.getId())
-                .missionDto(MissionDto.from(userMission.getMission()))
+                .mission(MissionDto.from(userMission.getMission()))
                 .missionType(userMission.getMissionType().name())
                 .userMissionStatus(userMission.getStatus())
                 .build();
