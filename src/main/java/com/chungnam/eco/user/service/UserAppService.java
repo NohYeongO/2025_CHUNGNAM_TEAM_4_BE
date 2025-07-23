@@ -5,20 +5,28 @@ import com.chungnam.eco.challenge.service.dto.ChallengeDto;
 import com.chungnam.eco.common.exception.DataIntegrityException;
 import com.chungnam.eco.common.exception.ImageUploadException;
 import com.chungnam.eco.common.exception.InvalidMissionStatusException;
+import com.chungnam.eco.common.exception.MissionChoiceException;
+import com.chungnam.eco.common.exception.MissionNotFoundExcption;
+import com.chungnam.eco.common.exception.InsufficientMissionException;
 import com.chungnam.eco.common.storage.AzureBlobStorageService;
 import com.chungnam.eco.common.storage.ImageUploadDto;
+import com.chungnam.eco.mission.domain.MissionType;
 import com.chungnam.eco.mission.service.UserFindMissionService;
 import com.chungnam.eco.mission.service.UserMissionSaveService;
 import com.chungnam.eco.mission.service.dto.UserMissionDto;
+import com.chungnam.eco.user.controller.request.MissionChoiceRequest;
+import com.chungnam.eco.user.controller.response.MissionChoiceResponse;
 import com.chungnam.eco.user.controller.response.MissionListResponse;
 import com.chungnam.eco.user.controller.response.MissionResponse;
 import com.chungnam.eco.user.controller.response.MissionSubmitResponse;
 import com.chungnam.eco.user.controller.response.UserMainResponse;
+import com.chungnam.eco.user.domain.User;
 import com.chungnam.eco.user.service.dto.*;
 import com.chungnam.eco.user.service.result.MissionProcessResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -84,6 +92,34 @@ public class UserAppService {
 
     public MissionResponse getMissionDetail(Long missionId) {
         return MissionResponse.from(userFindMissionService.getMissionDetail(missionId));
+    }
+
+    /**
+     * 미션 선택 처리
+     * @param userId 사용자 ID
+     * @param request 선택된 미션 ID 목록 (일일 3개, 주간 1개)
+     * @return 미션 선택 결과
+     */
+    @Transactional
+    public MissionChoiceResponse chooseMissions(Long userId, MissionChoiceRequest request) {
+        try {
+            UserInfoDto userInfo = UserInfoDto.from(userAuthService.getUserById(userId));
+
+            int dailyCount = userMissionSaveService.saveSelectedMissions(
+                    userInfo, request.getDailyMissionIds(), MissionType.DAILY);
+            int weeklyCount = userMissionSaveService.saveSelectedMissions(
+                    userInfo, request.getWeeklyMissionIds(), MissionType.WEEKLY);
+            
+            log.info("사용자 {}의 미션 선택 완료 - 일일: {}개, 주간: {}개", 
+                    userId, dailyCount, weeklyCount);
+            
+            return MissionChoiceResponse.success(dailyCount, weeklyCount);
+        } catch (MissionNotFoundExcption | InsufficientMissionException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("미션 선택 중 오류 발생 - 사용자 ID: {}, 오류: {}", userId, e.getMessage());
+            throw new MissionChoiceException("미션 선택 중 오류가 발생했습니다: " + e.getMessage());
+        }
     }
 
     public MissionSubmitResponse submitMission(Long userId, Long userMissionId, String description, List<MultipartFile> images) {

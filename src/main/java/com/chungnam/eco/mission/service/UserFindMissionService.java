@@ -1,6 +1,8 @@
 package com.chungnam.eco.mission.service;
 
+import com.chungnam.eco.common.exception.InsufficientMissionException;
 import com.chungnam.eco.common.exception.MissionNotFoundExcption;
+import com.chungnam.eco.common.notification.DiscordNotificationService;
 import com.chungnam.eco.mission.domain.*;
 import com.chungnam.eco.mission.repository.MissionJPARepository;
 import com.chungnam.eco.mission.service.dto.MissionDto;
@@ -20,6 +22,7 @@ public class UserFindMissionService {
 
     private final UserMissionJPARepository userMissionRepository;
     private final MissionJPARepository missionRepository;
+    private final DiscordNotificationService discordNotificationService;
 
     @Cacheable(value = "dailyMissions", key = "#userInfo.userId", cacheManager = "caffeineCacheManager",unless = "#result == null or #result.isEmpty()")
     public List<UserMissionDto> getDailyMissions(UserInfoDto userInfo) {
@@ -50,6 +53,11 @@ public class UserFindMissionService {
                 5
         );
 
+        if(missions.size() < 5){
+            discordNotificationService.sendMissionEmptyAlert(MissionType.DAILY.name(), userId);
+            throw new InsufficientMissionException("현재 일일 미션 목록이 부족합니다. 관리자에게 문의해주세요.");
+        }
+
         return missions.stream()
                 .map(MissionDto::from)
                 .toList();
@@ -62,6 +70,11 @@ public class UserFindMissionService {
                 MissionStatus.ACTIVATE.name(),
                 3
         );
+
+        if(missions.size() < 3){
+            discordNotificationService.sendMissionEmptyAlert(MissionType.WEEKLY.name(), userId);
+            throw new InsufficientMissionException("현재 주간 미션 목록이 부족합니다. 관리자에게 문의해주세요.");
+        }
 
         return missions.stream()
                 .map(MissionDto::from)
