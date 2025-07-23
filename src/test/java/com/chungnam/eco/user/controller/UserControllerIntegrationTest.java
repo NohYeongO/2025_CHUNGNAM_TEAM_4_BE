@@ -2,6 +2,7 @@ package com.chungnam.eco.user.controller;
 
 import com.chungnam.eco.common.jwt.JwtProvider;
 import com.chungnam.eco.config.TestContainerConfig;
+import com.chungnam.eco.user.controller.response.MissionChoiceResponse;
 import com.chungnam.eco.user.controller.response.MissionListResponse;
 import com.chungnam.eco.user.controller.response.MissionResponse;
 import com.chungnam.eco.user.controller.response.MissionSubmitResponse;
@@ -55,7 +56,7 @@ class UserControllerIntegrationTest extends TestContainerConfig {
                     assertThat(response.getUserInfo()).isNotNull();
                     assertThat(response.getDailyMissions()).isNotNull();
                     assertThat(response.getDailyMissions().size()).isEqualTo(3);
-                    assertThat(response.getWeeklyMissions().size()).isEqualTo(2);
+                    assertThat(response.getWeeklyMissions().size()).isEqualTo(1);
                 });
     }
 
@@ -79,7 +80,7 @@ class UserControllerIntegrationTest extends TestContainerConfig {
                     assertThat(response.getDailyMissions()).isEmpty();
                     assertThat(response.getWeeklyMissions()).isEmpty();
                     assertThat(response.getUserDailyMissions().size()).isEqualTo(3);
-                    assertThat(response.getUserWeeklyMissions().size()).isEqualTo(2);
+                    assertThat(response.getUserWeeklyMissions().size()).isEqualTo(1);
                 });
     }
 
@@ -173,6 +174,215 @@ class UserControllerIntegrationTest extends TestContainerConfig {
                 .expectBody(String.class)
                 .value(responseBody -> {
                     assertThat(responseBody).contains("미션이 성공적으로 제출되었습니다");
+                });
+    }
+
+    @Test
+    @DisplayName("미션 선택 - 정상적인 요청 (일일 3개, 주간 1개) - 성공")
+    void missionChoice_ValidRequest_Success() {
+        // given
+        String validToken = jwtProvider.generateAccessToken(2L, "USER"); // 사용자 2는 미션 선택하지 않은 상태
+        String requestBody = """
+                {
+                    "dailyMissionIds": [1, 2, 3],
+                    "weeklyMissionIds": [6]
+                }
+                """;
+
+        // when & then
+        webTestClient.post()
+                .uri("/api/missions/choice")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(MissionChoiceResponse.class)
+                .value(response -> {
+                    assertThat(response).isNotNull();
+                    assertThat(response.getMessage()).isEqualTo("미션 선택이 완료되었습니다.");
+                    assertThat(response.getSelectedDailyMissions()).isEqualTo(3);
+                    assertThat(response.getSelectedWeeklyMissions()).isEqualTo(1);
+                });
+    }
+
+    @Test
+    @DisplayName("미션 선택 - 일일 미션 개수 부족 (2개) - 실패")
+    void missionChoice_InsufficientDailyMissions_Fail() {
+        // given
+        String validToken = jwtProvider.generateAccessToken(2L, "USER");
+        String requestBody = """
+                {
+                    "dailyMissionIds": [1, 2],
+                    "weeklyMissionIds": [6]
+                }
+                """;
+
+        // when & then
+        webTestClient.post()
+                .uri("/api/missions/choice")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(responseBody -> {
+                    assertThat(responseBody).contains("일일 미션은 3개를 선택해야 합니다");
+                });
+    }
+
+    @Test
+    @DisplayName("미션 선택 - 일일 미션 개수 초과 (4개) - 실패")
+    void missionChoice_ExcessiveDailyMissions_Fail() {
+        // given
+        String validToken = jwtProvider.generateAccessToken(2L, "USER");
+        String requestBody = """
+                {
+                    "dailyMissionIds": [1, 2, 3, 4],
+                    "weeklyMissionIds": [6]
+                }
+                """;
+
+        // when & then
+        webTestClient.post()
+                .uri("/api/missions/choice")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(responseBody -> {
+                    assertThat(responseBody).contains("일일 미션은 3개를 선택해야 합니다");
+                });
+    }
+
+    @Test
+    @DisplayName("미션 선택 - 주간 미션 개수 부족 (0개) - 실패")
+    void missionChoice_NoWeeklyMissions_Fail() {
+        // given
+        String validToken = jwtProvider.generateAccessToken(2L, "USER");
+        String requestBody = """
+                {
+                    "dailyMissionIds": [1, 2, 3],
+                    "weeklyMissionIds": []
+                }
+                """;
+
+        // when & then
+        webTestClient.post()
+                .uri("/api/missions/choice")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(responseBody -> {
+                    assertThat(responseBody).contains("주간 미션은 1개를 선택해야 합니다");
+                });
+    }
+
+    @Test
+    @DisplayName("미션 선택 - 주간 미션 개수 초과 (2개) - 실패")
+    void missionChoice_ExcessiveWeeklyMissions_Fail() {
+        // given
+        String validToken = jwtProvider.generateAccessToken(2L, "USER");
+        String requestBody = """
+                {
+                    "dailyMissionIds": [1, 2, 3],
+                    "weeklyMissionIds": [6, 7]
+                }
+                """;
+
+        // when & then
+        webTestClient.post()
+                .uri("/api/missions/choice")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(responseBody -> {
+                    assertThat(responseBody).contains("주간 미션은 1개를 선택해야 합니다");
+                });
+    }
+
+    @Test
+    @DisplayName("미션 선택 - 존재하지 않는 미션 ID - 실패")
+    void missionChoice_NonExistentMissionIds_Fail() {
+        // given
+        String validToken = jwtProvider.generateAccessToken(2L, "USER");
+        String requestBody = """
+                {
+                    "dailyMissionIds": [999, 998, 997],
+                    "weeklyMissionIds": [996]
+                }
+                """;
+
+        // when & then
+        webTestClient.post()
+                .uri("/api/missions/choice")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus().isNotFound() // MissionNotFoundExcption -> 404
+                .expectBody(String.class)
+                .value(responseBody -> {
+                    assertThat(responseBody).contains("일부 미션을 찾을 수 없습니다");
+                });
+    }
+
+    @Test
+    @DisplayName("미션 선택 - 필수 필드 누락 (dailyMissionIds null) - 실패")
+    void missionChoice_MissingDailyMissionIds_Fail() {
+        // given
+        String validToken = jwtProvider.generateAccessToken(2L, "USER");
+        String requestBody = """
+                {
+                    "weeklyMissionIds": [6]
+                }
+                """;
+
+        // when & then
+        webTestClient.post()
+                .uri("/api/missions/choice")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(responseBody -> {
+                    assertThat(responseBody).contains("일일 미션을 선택해주세요");
+                });
+    }
+
+    @Test
+    @DisplayName("미션 선택 - 필수 필드 누락 (weeklyMissionIds null) - 실패")
+    void missionChoice_MissingWeeklyMissionIds_Fail() {
+        // given
+        String validToken = jwtProvider.generateAccessToken(2L, "USER");
+        String requestBody = """
+                {
+                    "dailyMissionIds": [1, 2, 3]
+                }
+                """;
+
+        // when & then
+        webTestClient.post()
+                .uri("/api/missions/choice")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(responseBody -> {
+                    assertThat(responseBody).contains("주간 미션을 선택해주세요");
                 });
     }
 }
