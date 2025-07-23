@@ -22,6 +22,10 @@ public enum ErrorCode {
     // 사용자 관련 에러
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "사용자를 찾을 수 없습니다."),
     MISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "U002", "미션을 찾을 수 없습니다."),
+    
+    // 미션 선택 관련 에러
+    MISSION_CHOICE_ERROR(HttpStatus.BAD_REQUEST, "M001", "미션 선택 중 오류가 발생했습니다."),
+    INSUFFICIENT_MISSION(HttpStatus.INTERNAL_SERVER_ERROR, "M002", "현재 미션 목록이 부족합니다."),
 
     // 인증/인가 관련 에러
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A001", "유효하지 않은 토큰입니다."),

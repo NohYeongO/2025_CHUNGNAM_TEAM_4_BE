@@ -16,6 +16,48 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 public class GlobalExceptionHandler {
 
     /**
+     * MissionChoiceException 처리
+     */
+    @ExceptionHandler(MissionChoiceException.class)
+    public ResponseEntity<ErrorResponse> handleMissionChoiceException(
+            MissionChoiceException e,
+            HttpServletRequest request) {
+
+        log.warn("Mission choice error: {}", e.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.of(
+                e.getErrorCode().getCode(),
+                e.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(e.getErrorCode().getHttpStatus())
+                .body(errorResponse);
+    }
+
+    /**
+     * InsufficientMissionException 처리
+     */
+    @ExceptionHandler(InsufficientMissionException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientMissionException(
+            InsufficientMissionException e,
+            HttpServletRequest request) {
+
+        log.warn("Insufficient mission: {}", e.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.of(
+                e.getErrorCode().getCode(),
+                e.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(e.getErrorCode().getHttpStatus())
+                .body(errorResponse);
+    }
+
+    /**
      * MissionNotFoundExcption 처리
      */
     @ExceptionHandler(MissionNotFoundExcption.class)
@@ -211,24 +253,24 @@ public class GlobalExceptionHandler {
                 .body(errorResponse);
     }
 
-    /**
-     * DataIntegrityException 처리
-     */
-    @ExceptionHandler(DataIntegrityException.class)
-    public ResponseEntity<ErrorResponse> handleDataIntegrityException(
-            DataIntegrityException e,
-            HttpServletRequest request) {
+         /**
+      * DataIntegrityException 처리
+      */
+     @ExceptionHandler(DataIntegrityException.class)
+     public ResponseEntity<ErrorResponse> handleDataIntegrityException(
+             DataIntegrityException e,
+             HttpServletRequest request) {
 
-        log.warn("Data integrity violation: {}", e.getMessage());
+         log.warn("Data integrity violation: {}", e.getMessage());
 
-        ErrorResponse errorResponse = ErrorResponse.of(
-                e.getErrorCode().getCode(),
-                e.getMessage() != null ? e.getMessage() : e.getErrorCode().getMessage(),
-                request.getRequestURI()
-        );
+         ErrorResponse errorResponse = ErrorResponse.of(
+                 e.getErrorCode().getCode(),
+                 e.getMessage() != null ? e.getMessage() : e.getErrorCode().getMessage(),
+                 request.getRequestURI()
+         );
 
-        return ResponseEntity
-                .status(e.getErrorCode().getHttpStatus())
+         return ResponseEntity
+                 .status(e.getErrorCode().getHttpStatus())
                                  .body(errorResponse);
      }
 

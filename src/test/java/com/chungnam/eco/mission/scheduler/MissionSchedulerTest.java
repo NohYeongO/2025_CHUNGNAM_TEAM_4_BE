@@ -55,7 +55,7 @@ class MissionSchedulerTest extends TestContainerConfig {
         long weeklyInProgressCount = userMissionRepository.findAll().stream()
                 .filter(um -> um.getMissionType() == MissionType.WEEKLY && (um.getStatus() == UserMissionStatus.IN_PROGRESS || um.getStatus() == UserMissionStatus.SUBMITTED))
                 .count();
-        assertThat(weeklyInProgressCount).isEqualTo(2);
+        assertThat(weeklyInProgressCount).isEqualTo(1);
 
         // when
         missionScheduler.expireWeeklyMissions();

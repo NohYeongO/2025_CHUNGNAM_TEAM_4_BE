@@ -1,7 +1,9 @@
 package com.chungnam.eco.user.controller;
 
 import com.chungnam.eco.common.security.AuthenticationHelper;
+import com.chungnam.eco.user.controller.request.MissionChoiceRequest;
 import com.chungnam.eco.user.controller.request.MissionSubmitRequest;
+import com.chungnam.eco.user.controller.response.MissionChoiceResponse;
 import com.chungnam.eco.user.controller.response.MissionListResponse;
 import com.chungnam.eco.user.controller.response.MissionResponse;
 import com.chungnam.eco.user.controller.response.MissionSubmitResponse;
@@ -38,6 +40,17 @@ public class UserMissionController {
     @GetMapping("/{missionId}")
     public ResponseEntity<MissionResponse> getMissionDetail(@PathVariable Long missionId) {
         return ResponseEntity.ok(userAppService.getMissionDetail(missionId));
+    }
+
+    /**
+     * 미션 선택 API
+     * @param request 선택할 미션 ID 목록 (일일 3개, 주간 1개)
+     * @return 미션 선택 결과
+     */
+    @PostMapping("/choice")
+    public ResponseEntity<MissionChoiceResponse> missionChoice(@RequestBody @Valid MissionChoiceRequest request) {
+        Long userId = AuthenticationHelper.getCurrentUserId();
+        return ResponseEntity.ok(userAppService.chooseMissions(userId, request));
     }
 
     /**
