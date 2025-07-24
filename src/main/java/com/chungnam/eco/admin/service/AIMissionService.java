@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AIMissionService {
     private final OpenAIClient openAIClient;
     private final MissionJPARepository missionJPARepository;
+    private final SentenceSimilarityService sentenceSimilarityService;
 
     /**
      * 생성할 미션의 프롬프트를 셋팅
@@ -86,8 +87,22 @@ public class AIMissionService {
         return missionJPARepository.saveAll(missionList);
     }
 
-    // 유사도 측정 - 미완성
-    public boolean isNotSimilarityMission(AIMissionDto mission) {
+    /**
+     * 유사도 측정
+     *
+     * @param newMission          새로 생성된 미션
+     * @param ExistingMissionList 기돈 미션 리스트
+     * @return 문장을 비교하요 유사도가 5가 넘은 경우 false 반환
+     */
+    public boolean isNotSimilarityMission(AIMissionDto newMission, List<Mission> ExistingMissionList) {
+        String title1 = newMission.getTitle();
+        for (Mission existingMission : ExistingMissionList) {
+            String title2 = existingMission.getTitle();
+            double similarity = sentenceSimilarityService.checkSimilarity(title1, title2);
+            if (similarity > 5) { // 유사도가 높음
+                return false;
+            }
+        }
         return true;
     }
 
@@ -99,8 +114,10 @@ public class AIMissionService {
 
     @Transactional
     public List<MissionDto> createMission(List<AIMissionDto> aiMissionDtoList) {
+        List<Mission> ExistingMissionList = missionJPARepository.findAll();
 
-        List<Mission> missionList = aiMissionDtoList.stream()
+        List<Mission> aiMissionList = aiMissionDtoList.stream()
+                .filter(v -> isNotSimilarityMission(v, ExistingMissionList)) // 유사도 필터링
                 .map(v -> Mission.builder()
                         .title(v.getTitle())
                         .description(v.getDescription())
@@ -111,7 +128,7 @@ public class AIMissionService {
                         .build())
                 .toList();
 
-        List<Mission> saveMissionList = saveMission(missionList);
+        List<Mission> saveMissionList = saveMission(aiMissionList);
 
         return saveMissionList.stream()
                 .map(MissionDto::from)
