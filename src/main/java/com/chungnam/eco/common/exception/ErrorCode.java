@@ -15,14 +15,17 @@ public enum ErrorCode {
     // 엔티티 관련 에러
     INVALID_CHALLENGE(HttpStatus.INTERNAL_SERVER_ERROR, "E001", "Challenge가 존재하지 않습니다."),
     INVALID_MISSION(HttpStatus.INTERNAL_SERVER_ERROR, "E002", "Mission이 존재하지 않습니다."),
-    
+
     // 사용자 관련 에러
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "사용자를 찾을 수 없습니다."),
     MISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "U002", "미션을 찾을 수 없습니다."),
 
     // 인증/인가 관련 에러
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A001", "유효하지 않은 토큰입니다."),
-    MISSING_AUTHORIZATION_HEADER(HttpStatus.UNAUTHORIZED, "A002", "Authorization 헤더가 없거나 Bearer 토큰 형식이 아닙니다.");
+    MISSING_AUTHORIZATION_HEADER(HttpStatus.UNAUTHORIZED, "A002", "Authorization 헤더가 없거나 Bearer 토큰 형식이 아닙니다."),
+
+    // AI 에러
+    AI_MISSION_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI001", "AI 기반 미션 생성 중 오류가 발생했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

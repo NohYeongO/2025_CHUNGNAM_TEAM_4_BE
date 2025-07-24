@@ -183,4 +183,26 @@ public class GlobalExceptionHandler {
                 .status(errorCode.getHttpStatus())
                 .body(errorResponse);
     }
+
+    /**
+     * AI 생성 예외 처리
+     */
+    @ExceptionHandler(AICreationExceptions.class)
+    public ResponseEntity<ErrorResponse> HandleAICreationException(
+            AICreationExceptions e,
+            HttpServletRequest request) {
+        log.error("Invalid mission : ", e);
+
+        ErrorCode errorCode = e.getErrorCode();
+
+        ErrorResponse errorResponse = ErrorResponse.of(
+                errorCode.getCode(),
+                errorCode.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(errorResponse);
+    }
 }
