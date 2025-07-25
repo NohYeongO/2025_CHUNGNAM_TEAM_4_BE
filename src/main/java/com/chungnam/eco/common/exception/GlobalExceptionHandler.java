@@ -100,6 +100,27 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * PostNotFoundException 처리
+     */
+    @ExceptionHandler(PostNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePostNotFoundException(
+            PostNotFoundException e,
+            HttpServletRequest request) {
+
+        log.warn("Post not found: {}", e.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.of(
+                e.getErrorCode().getCode(),
+                e.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(e.getErrorCode().getHttpStatus())
+                .body(errorResponse);
+    }
+
+    /**
      * IllegalArgumentException 처리 (주로 토큰 형식 오류)
      */
     @ExceptionHandler(IllegalArgumentException.class)
