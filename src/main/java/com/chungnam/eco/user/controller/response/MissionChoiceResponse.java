@@ -11,7 +11,7 @@ public class MissionChoiceResponse {
     private final int selectedDailyMissions;
     private final int selectedWeeklyMissions;
     
-    /**
+        /**
      * 미션 선택 성공
      */
     public static MissionChoiceResponse success(int dailyCount, int weeklyCount) {
