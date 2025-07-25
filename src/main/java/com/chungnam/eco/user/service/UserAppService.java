@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -103,18 +104,28 @@ public class UserAppService {
     @Transactional
     public MissionChoiceResponse chooseMissions(Long userId, MissionChoiceRequest request) {
         try {
-            UserInfoDto userInfo = UserInfoDto.from(userAuthService.getUserById(userId));
+            if(!request.getWeeklyMissionIds().isEmpty() && request.getWeeklyMissionIds().size() != 1){
+                throw new MissionChoiceException("주간 미션은 1개를 선택해야 합니다.");
+            }
+            if(!request.getDailyMissionIds().isEmpty() && request.getDailyMissionIds().size() != 3){
+                throw new MissionChoiceException("일일 미션은 3개를 선택해야 합니다.");
+            }
 
-            int dailyCount = userMissionSaveService.saveSelectedMissions(
-                    userInfo, request.getDailyMissionIds(), MissionType.DAILY);
-            int weeklyCount = userMissionSaveService.saveSelectedMissions(
-                    userInfo, request.getWeeklyMissionIds(), MissionType.WEEKLY);
-            
-            log.info("사용자 {}의 미션 선택 완료 - 일일: {}개, 주간: {}개", 
-                    userId, dailyCount, weeklyCount);
-            
-            return MissionChoiceResponse.success(dailyCount, weeklyCount);
-        } catch (MissionNotFoundExcption | InsufficientMissionException e) {
+            UserInfoDto userInfo = UserInfoDto.from(userAuthService.getUserById(userId));
+            CompletableFuture<Integer> weeklyCountFuture = CompletableFuture.supplyAsync(() ->
+                    request.getWeeklyMissionIds().isEmpty() ? 0 :
+                            userMissionSaveService.saveSelectedMissions(userInfo, request.getWeeklyMissionIds(), MissionType.WEEKLY)
+            );
+            CompletableFuture<Integer> dailyCountFuture = CompletableFuture.supplyAsync(() ->
+                    request.getDailyMissionIds().isEmpty() ? 0 :
+                            userMissionSaveService.saveSelectedMissions(userInfo, request.getDailyMissionIds(), MissionType.DAILY)
+            );
+
+            return weeklyCountFuture.thenCombine(dailyCountFuture,
+                    (weekly, daily) -> MissionChoiceResponse.success(daily, weekly)
+            ).join();
+
+        } catch (MissionNotFoundExcption | InsufficientMissionException | MissionChoiceException e) {
             throw e;
         } catch (Exception e) {
             log.error("미션 선택 중 오류 발생 - 사용자 ID: {}, 오류: {}", userId, e.getMessage());
@@ -122,6 +133,14 @@ public class UserAppService {
         }
     }
 
+    /**
+     * 미션 제출 처리
+     * @param userId 사용자 ID
+     * @param userMissionId 사용자 미션 ID
+     * @param description 미션 설명
+     * @param images 제출할 이미지 목록
+     * @return MissionSubmitResponse
+     */
     public MissionSubmitResponse submitMission(Long userId, Long userMissionId, String description, List<MultipartFile> images) {
         ChallengeDto tempChallenge = null;
         try {

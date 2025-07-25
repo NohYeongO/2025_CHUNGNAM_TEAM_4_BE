@@ -16,7 +16,7 @@ public enum ErrorCode {
     // 엔티티 관련 에러
     INVALID_CHALLENGE(HttpStatus.INTERNAL_SERVER_ERROR, "E001", "Challenge가 존재하지 않습니다."),
     INVALID_MISSION(HttpStatus.INTERNAL_SERVER_ERROR, "E002", "Mission이 존재하지 않습니다."),
-    INVALID_MISSION_STATUS(HttpStatus.CONFLICT, "E003", "진행 중인 미션만 제출할 수 있습니다."),
+    INVALID_MISSION_STATUS(HttpStatus.CONFLICT, "E003", "진행 중인 미션만 제출할 수 있습니다.(* 제출 시간 확인)"),
 
 
     // 사용자 관련 에러
@@ -32,7 +32,7 @@ public enum ErrorCode {
     MISSING_AUTHORIZATION_HEADER(HttpStatus.UNAUTHORIZED, "A002", "Authorization 헤더가 없거나 Bearer 토큰 형식이 아닙니다."),
 
     // 이미지 업로드 관련 에러
-    IMAGE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "I001", "이미지 업로드에 실패했습니다.");
+    IMAGE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "I001", "이미지 업로드에 실패했습니다."),
 
     // AI 에러
     AI_MISSION_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI001", "AI 기반 미션 생성 중 오류가 발생했습니다.");

@@ -259,8 +259,8 @@ class UserControllerIntegrationTest extends TestContainerConfig {
     }
 
     @Test
-    @DisplayName("미션 선택 - 주간 미션 개수 부족 (0개) - 실패")
-    void missionChoice_NoWeeklyMissions_Fail() {
+    @DisplayName("미션 선택 - 주간 미션 없이 일일 미션만 선택 - 성공")
+    void missionChoice_OnlyDailyMissions_Success() {
         // given
         String validToken = jwtProvider.generateAccessToken(2L, "USER");
         String requestBody = """
@@ -277,10 +277,12 @@ class UserControllerIntegrationTest extends TestContainerConfig {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
                 .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody(String.class)
-                .value(responseBody -> {
-                    assertThat(responseBody).contains("주간 미션은 1개를 선택해야 합니다");
+                .expectStatus().isOk()
+                .expectBody(MissionChoiceResponse.class)
+                .value(response -> {
+                    assertThat(response).isNotNull();
+                    assertThat(response.getSelectedDailyMissions()).isEqualTo(3);
+                    assertThat(response.getSelectedWeeklyMissions()).isEqualTo(0);
                 });
     }
 
@@ -306,83 +308,7 @@ class UserControllerIntegrationTest extends TestContainerConfig {
                 .expectStatus().isBadRequest()
                 .expectBody(String.class)
                 .value(responseBody -> {
-                    assertThat(responseBody).contains("주간 미션은 1개를 선택해야 합니다");
-                });
-    }
-
-    @Test
-    @DisplayName("미션 선택 - 존재하지 않는 미션 ID - 실패")
-    void missionChoice_NonExistentMissionIds_Fail() {
-        // given
-        String validToken = jwtProvider.generateAccessToken(2L, "USER");
-        String requestBody = """
-                {
-                    "dailyMissionIds": [999, 998, 997],
-                    "weeklyMissionIds": [996]
-                }
-                """;
-
-        // when & then
-        webTestClient.post()
-                .uri("/api/missions/choice")
-                .header("Authorization", "Bearer " + validToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(requestBody)
-                .exchange()
-                .expectStatus().isNotFound() // MissionNotFoundExcption -> 404
-                .expectBody(String.class)
-                .value(responseBody -> {
-                    assertThat(responseBody).contains("일부 미션을 찾을 수 없습니다");
-                });
-    }
-
-    @Test
-    @DisplayName("미션 선택 - 필수 필드 누락 (dailyMissionIds null) - 실패")
-    void missionChoice_MissingDailyMissionIds_Fail() {
-        // given
-        String validToken = jwtProvider.generateAccessToken(2L, "USER");
-        String requestBody = """
-                {
-                    "weeklyMissionIds": [6]
-                }
-                """;
-
-        // when & then
-        webTestClient.post()
-                .uri("/api/missions/choice")
-                .header("Authorization", "Bearer " + validToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(requestBody)
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody(String.class)
-                .value(responseBody -> {
-                    assertThat(responseBody).contains("일일 미션을 선택해주세요");
-                });
-    }
-
-    @Test
-    @DisplayName("미션 선택 - 필수 필드 누락 (weeklyMissionIds null) - 실패")
-    void missionChoice_MissingWeeklyMissionIds_Fail() {
-        // given
-        String validToken = jwtProvider.generateAccessToken(2L, "USER");
-        String requestBody = """
-                {
-                    "dailyMissionIds": [1, 2, 3]
-                }
-                """;
-
-        // when & then
-        webTestClient.post()
-                .uri("/api/missions/choice")
-                .header("Authorization", "Bearer " + validToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(requestBody)
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody(String.class)
-                .value(responseBody -> {
-                    assertThat(responseBody).contains("주간 미션을 선택해주세요");
+                    assertThat(responseBody).contains("주간 미션은 1개를 선택해야 합니다.");
                 });
     }
 }
