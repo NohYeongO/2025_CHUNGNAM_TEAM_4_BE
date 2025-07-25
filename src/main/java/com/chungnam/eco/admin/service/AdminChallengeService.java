@@ -13,6 +13,7 @@ import com.chungnam.eco.user.repository.UserJPARepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,9 @@ public class AdminChallengeService {
     private final ChallengeJPARepository challengeJPARepository;
     private final ChallengeImageJPARepository challengeImageJPARepository;
     private final UserJPARepository userJPARepository;
+
+    @Value("${azure.storage.sas-token}")
+    private String sasToken;
 
     /**
      * 챌린지를 ID로 조회합니다.
@@ -109,7 +113,18 @@ public class AdminChallengeService {
         List<ChallengeImage> challengeImageList = findChallengeImage(challengeId);
         return challengeImageList.stream()
                 .map(ChallengeImage::getUrl)
+                .map(this::addSasToken)
                 .toList();
+    }
+
+    /**
+     * 이미지 URL에 SAS 토큰을 붙입니다.
+     *
+     * @param baseUrl 기본 이미지 URL
+     * @return SAS 토큰이 붙은 완전한 URL
+     */
+    private String addSasToken(String baseUrl) {
+        return baseUrl + sasToken;
     }
 
     @Transactional

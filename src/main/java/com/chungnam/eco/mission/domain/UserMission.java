@@ -45,4 +45,8 @@ public class UserMission extends BaseTimeEntity {
         this.missionType = missionType;
         this.status = status != null ? status : UserMissionStatus.IN_PROGRESS; // 기본 상태는 IN_PROGRESS
     }
+
+    public void submitStatusUpdate() {
+        this.status = UserMissionStatus.SUBMITTED;
+    }
 }

@@ -49,25 +49,11 @@ public class ChallengeImage extends BaseTimeEntity {
 
 
     @Builder
-    public ChallengeImage(Challenge challenge, String originalName, Integer sort) {
+    public ChallengeImage(Challenge challenge, String originalName, String storedName, Integer sort, String url) {
         this.challenge = challenge;
         this.originalName = originalName;
-        this.sort = sort != null ? sort : 1; // null-safe
-        this.storedName = generateStoredName();
-        this.url = generateUrl();
+        this.sort = sort;
+        this.storedName = storedName;
+        this.url = url;
     }
-
-    // UUID 자동생성
-    private String generateStoredName() {
-        return java.util.UUID.randomUUID().toString();
-    }
-
-    // 이미지 경로 생성
-    private String generateUrl() {
-        if (this.challenge == null || this.challenge.getId() == null) {
-            throw new InvalidChallengeException("첼린지가 존재하지 않습니다"); // challenge 없을 경우 예외 처리
-        }
-        return "/images/" + this.challenge.getId() + "/" + this.storedName; // challenge id 로 폴더 생성 후 이미지 저장
-    }
-
 }

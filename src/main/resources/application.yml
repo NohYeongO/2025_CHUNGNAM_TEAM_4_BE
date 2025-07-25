@@ -16,7 +16,9 @@ spring:
 redis:
   main:
     host: ${REDIS_MAIN_HOST:localhost}
-    port: 6379
+    port: ${REDIS_MAIN_PORT:6379}
+    password: ${REDIS_MAIN_PASSWORD:Test}
+    ssl: true  # Azure Redis Cache는 SSL 필수
 
 # OPEN AI API 설정
 open_ai:
@@ -36,3 +38,10 @@ discord:
 logging:
   config: classpath:logback-spring.xml
 
+# Azure Blob Storage 설정
+azure:
+  storage:
+    account-name: ${AZURE_STORAGE_ACCOUNT_NAME}
+    account-key: ${AZURE_STORAGE_ACCOUNT_KEY}
+    container-name: ${AZURE_STORAGE_CONTAINER_NAME}
+    sas-token: ${AZURE_STORAGE_SAS_TOKEN}

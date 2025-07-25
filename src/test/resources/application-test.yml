@@ -9,6 +9,11 @@ spring:
     hibernate:
       ddl-auto: create-drop
     defer-datasource-initialization: true
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: create-drop
+        globally_quoted_identifiers: true
   sql:
     init:
       mode: always
@@ -18,6 +23,8 @@ redis:
   main:
     host: localhost
     port: 6379
+    password: ""  # TestContainers Redis는 password 없음
+    ssl: false    # TestContainers Redis는 SSL 없음
 
 # JWT 테스트 설정
 jwt:
@@ -36,3 +43,9 @@ logging:
     com.chungnam.eco: INFO  # 애플리케이션 로그
     org.hibernate.SQL: DEBUG    # SQL 로그
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # SQL 파라미터 로그
+
+azure:
+  storage:
+    account-name: ${AZURE_STORAGE_ACCOUNT_NAME}
+    account-key: ${AZURE_STORAGE_ACCOUNT_KEY}
+    container-name: ${AZURE_STORAGE_CONTAINER_NAME}
