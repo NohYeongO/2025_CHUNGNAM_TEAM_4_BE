@@ -20,6 +20,10 @@ redis:
     password: ${REDIS_MAIN_PASSWORD:Test}
     ssl: true  # Azure Redis Cache는 SSL 필수
 
+# OPEN AI API 설정
+open_ai:
+  secret: ${OPENAI_API_KEY}
+
 # JWT 설정 (토큰 만료 시간을 초 단위로 설정)
 jwt:
   secret: ${JWT_SECRET:ZGVmYXVsdFNlY3JldEtleUZvckpXVFRva2VuVGhhdElzUmVhbGx5TG9uZ0FuZFNlY3VyZUZvclByb2R1Y3Rpb24=}

@@ -4,6 +4,10 @@ import com.chungnam.eco.admin.controller.request.CreateMissionRequest;
 import com.chungnam.eco.admin.controller.request.EditMissionRequest;
 import com.chungnam.eco.admin.controller.response.AllMissionResponse;
 import com.chungnam.eco.admin.controller.response.MissionMainResponse;
+import com.chungnam.eco.admin.service.AIMissionService;
+import com.chungnam.eco.admin.service.dto.AIMissionListResponseDto.AIMissionDto;
+import com.chungnam.eco.mission.domain.MissionCategory;
+import com.chungnam.eco.mission.domain.MissionType;
 import com.chungnam.eco.mission.service.MissionService;
 import com.chungnam.eco.mission.service.dto.MissionDto;
 import java.util.List;
@@ -23,6 +27,30 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AdminMissionController {
     private final MissionService missionService;
+    private final AIMissionService aimissionService;
+
+    /**
+     * AI 미션 생성
+     *
+     * @param type     미션의 타입을 지정
+     * @param category 미션의 카테고리를 지정
+     * @param size     생성할 미션의 갯수를 지정
+     */
+    @PostMapping("/ai-missions/generate")
+    public ResponseEntity<AllMissionResponse> aiGenerateMission(@RequestParam MissionType type,
+                                                                @RequestParam MissionCategory category,
+                                                                @RequestParam int size) {
+        List<AIMissionDto> aiMissionDtoList = aimissionService.generateMissionsWithAI(
+                category, type, size);
+
+        List<MissionDto> missionDtoList = aimissionService.createMission(aiMissionDtoList);
+
+        AllMissionResponse response = AllMissionResponse.success(missionDtoList);
+
+        return ResponseEntity.ok(response);
+
+    }
+
 
     /**
      * 미션 생성 API
