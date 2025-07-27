@@ -114,14 +114,10 @@ class UserControllerIntegrationTest extends TestContainerConfig {
         // given
         String validToken = jwtProvider.generateAccessToken(1L, "USER");
 
-        // JSON 부분을 올바른 Content-Type으로 설정
-        HttpHeaders jsonHeaders = new HttpHeaders();
-        jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> jsonPart = new HttpEntity<>("{\"userMissionId\": 1, \"description\": \"미션 완료했습니다!\"}", jsonHeaders);
-
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("request", jsonPart);
-        body.add("images", "");
+
+        body.add("userMissionId", "1");
+        body.add("description", "미션 완료했습니다!");
 
         // when & then
         webTestClient.post()
@@ -139,9 +135,7 @@ class UserControllerIntegrationTest extends TestContainerConfig {
         // given
         String validToken = jwtProvider.generateAccessToken(1L, "USER");
 
-        // 실제 이미지 파일 사용
         ClassPathResource imageFile = new ClassPathResource("images/프로필.png");
-
         ByteArrayResource imageResource;
         try {
             imageResource = new ByteArrayResource(imageFile.getInputStream().readAllBytes()) {
@@ -154,13 +148,9 @@ class UserControllerIntegrationTest extends TestContainerConfig {
             throw new RuntimeException("이미지 파일을 읽을 수 없습니다: " + e.getMessage());
         }
 
-        // JSON 부분을 올바른 Content-Type으로 설정
-        HttpHeaders jsonHeaders = new HttpHeaders();
-        jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> jsonPart = new HttpEntity<>("{\"userMissionId\": 1, \"description\": \"미션 완료했습니다!\"}", jsonHeaders);
-
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("request", jsonPart);
+        body.add("userMissionId", "1");
+        body.add("description", "미션 완료했습니다!");
         body.add("images", imageResource);
 
         // when & then
