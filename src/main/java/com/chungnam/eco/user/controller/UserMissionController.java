@@ -55,19 +55,20 @@ public class UserMissionController {
 
     /**
      * 미션 제출 API
-     * @param request 미션 제출 요청 (userMissionId, description)
+     * @param userMissionId, description
      * @param images 제출할 이미지 파일들 (1~2장)
      * @return 미션 제출 결과
      */
     @PostMapping(value = "/submit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MissionSubmitResponse> submitMission(
-            @RequestPart("request") @Valid MissionSubmitRequest request,
+            @RequestParam("userMissionId") Long userMissionId,
+            @RequestParam("description") String description,
             @RequestPart("images") @NotNull(message = "이미지는 필수입니다.") 
             @Size(min = 1, max = 3, message = "이미지는 1~3장까지 업로드 가능합니다.") List<MultipartFile> images
     ) {
         Long userId = AuthenticationHelper.getCurrentUserId();
 
-        MissionSubmitResponse response = userAppService.submitMission(userId, request.getUserMissionId(), request.getDescription(), images);
+        MissionSubmitResponse response = userAppService.submitMission(userId, userMissionId, description, images);
         
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);
