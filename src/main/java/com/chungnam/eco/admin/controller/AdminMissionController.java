@@ -1,5 +1,6 @@
 package com.chungnam.eco.admin.controller;
 
+import com.chungnam.eco.admin.controller.request.ChangeMissionStatusRequest;
 import com.chungnam.eco.admin.controller.request.CreateMissionRequest;
 import com.chungnam.eco.admin.controller.request.EditMissionRequest;
 import com.chungnam.eco.admin.controller.response.AllMissionResponse;
@@ -70,15 +71,17 @@ public class AdminMissionController {
     /**
      * 특정 미션을 활성화 상태로 변경합니다.
      *
-     * @param missionId 활성화할 미션의 ID
+     * @param changeMissionStatusRequest 활성화할 미션의 ID 리스트
      * @return ResponseEntity(MissionMainResponse) 활성화된 미션 정보
      */
 
-    @PatchMapping("/missions/{missionId}/activate")
-    public ResponseEntity<MissionMainResponse> activateMission(@PathVariable Long missionId) {
+    @PatchMapping("/missions/activate")
+    public ResponseEntity<AllMissionResponse> activateMission(
+            @RequestBody ChangeMissionStatusRequest changeMissionStatusRequest) {
 
-        MissionDto missionDto = missionService.activateMission(missionId); // Mission status activate로 변경
-        MissionMainResponse response = MissionMainResponse.success(missionDto);
+        List<Long> missionIdList = changeMissionStatusRequest.getMission_list();
+        List<MissionDto> missionDtoList = missionService.activateMission(missionIdList); // Mission status activate로 변경
+        AllMissionResponse response = AllMissionResponse.success(missionDtoList);
 
         return ResponseEntity.ok(response);
     }
@@ -102,14 +105,16 @@ public class AdminMissionController {
     /**
      * 특정 미션을 삭제(비활성화)합니다.
      *
-     * @param missionId 삭제할 미션의 ID
+     * @param changeMissionStatusRequest 삭제할 미션의 ID 리스트
      * @return ResponseEntity(MissionMainResponse) 삭제된 미션 정보
      */
-    @PatchMapping("/missions/{missionId}/delete")
-    public ResponseEntity<MissionMainResponse> deleteMission(@PathVariable Long missionId) {
+    @PatchMapping("/missions/delete")
+    public ResponseEntity<AllMissionResponse> deleteMission(
+            @RequestBody ChangeMissionStatusRequest changeMissionStatusRequest) {
 
-        MissionDto missionDto = missionService.deactivateMission(missionId); // Mission status delete로 변경
-        MissionMainResponse response = MissionMainResponse.success(missionDto);
+        List<Long> missionIdList = changeMissionStatusRequest.getMission_list();
+        List<MissionDto> missionDtoList = missionService.deactivateMission(missionIdList); // Mission status delete로 변경
+        AllMissionResponse response = AllMissionResponse.success(missionDtoList);
 
         return ResponseEntity.ok(response);
     }

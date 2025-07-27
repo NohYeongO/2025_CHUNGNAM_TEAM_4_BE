@@ -6,6 +6,7 @@ import com.chungnam.eco.mission.domain.Mission;
 import com.chungnam.eco.mission.domain.MissionStatus;
 import com.chungnam.eco.mission.repository.MissionJPARepository;
 import com.chungnam.eco.mission.service.dto.MissionDto;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -56,14 +57,18 @@ public class MissionService {
     /**
      * 특정 미션을 활성화 상태로 변경합니다.
      *
-     * @param missionId 활성화할 미션의 ID
+     * @param missionIdList 활성화할 미션의 ID
      * @return 활성화된 미션의 정보가 담긴 {@link MissionDto}
      */
     @Transactional
-    public MissionDto activateMission(Long missionId) {
-        Mission mission = findMissionById(missionId);
-        mission.activate(); // 미션 활성화
-        return MissionDto.from(mission);
+    public List<MissionDto> activateMission(List<Long> missionIdList) {
+        List<MissionDto> missionDtoList = new ArrayList<>();
+        for (Long id : missionIdList) {
+            Mission mission = findMissionById(id);
+            mission.activate(); // 미션 활성화
+            missionDtoList.add(MissionDto.from(mission));
+        }
+        return missionDtoList;
     }
 
     /**
@@ -73,10 +78,14 @@ public class MissionService {
      * @return 비활성화된 미션의 정보가 담긴 {@link MissionDto}
      */
     @Transactional
-    public MissionDto deactivateMission(Long missionId) {
-        Mission mission = findMissionById(missionId);
-        mission.disable(); // 미션 비활성화
-        return MissionDto.from(mission);
+    public List<MissionDto> deactivateMission(List<Long> missionId) {
+        List<MissionDto> missionDtoList = new ArrayList<>();
+        for (Long id : missionId) {
+            Mission mission = findMissionById(id);
+            mission.disable(); // 미션 비활성화
+            missionDtoList.add(MissionDto.from(mission));
+        }
+        return missionDtoList;
     }
 
     /**

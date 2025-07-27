@@ -16,7 +16,7 @@ public class ChallengeDto {
     private Mission mission;
     private String submissionText;
     private ChallengeStatus challengeStatus;
-    private LocalDateTime completedAt;
+    private LocalDateTime createdAt;
 
 
     /**
@@ -29,7 +29,7 @@ public class ChallengeDto {
                 .mission(challenge.getMission())
                 .submissionText(challenge.getSubmissionText())
                 .challengeStatus(challenge.getChallengeStatus())
-                .completedAt(challenge.getCompletedAt())
+                .createdAt(challenge.getCreatedAt())
                 .build();
     }
 

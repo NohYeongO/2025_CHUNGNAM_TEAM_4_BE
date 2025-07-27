@@ -3,6 +3,7 @@ package com.chungnam.eco.admin.controller.response;
 import com.chungnam.eco.admin.service.dto.ChallengeDto;
 import com.chungnam.eco.mission.domain.Mission;
 import com.chungnam.eco.user.domain.User;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +17,7 @@ public class ChallengeDetailResponse {
     private final List<String> image_url;
     private final String submissionText;
     private final String status;
+    private final LocalDateTime created_at;
 
     @Builder
     @Getter
@@ -45,6 +47,7 @@ public class ChallengeDetailResponse {
                 .challenge_id(challengeDto.getId())
                 .user_nickname(user.getNickname())
                 .mission_info(missionInfo)
+                .created_at(challengeDto.getCreatedAt())
                 .image_url(image_url)
                 .submissionText(challengeDto.getSubmissionText())
                 .status(challengeDto.getChallengeStatus().getDescription())
