@@ -3,16 +3,8 @@ package com.chungnam.eco.challenge.domain;
 import com.chungnam.eco.common.entity.BaseTimeEntity;
 import com.chungnam.eco.mission.domain.Mission;
 import com.chungnam.eco.user.domain.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -43,6 +35,7 @@ public class Challenge extends BaseTimeEntity {
     private String submissionText;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private ChallengeStatus challengeStatus;
 
     @Column(name = "started_at")
