@@ -45,11 +45,11 @@ public class Challenge extends BaseTimeEntity {
     private LocalDateTime completedAt;
 
     @Builder
-    public Challenge(User user, Mission mission) {
+    public Challenge(User user, Mission mission, ChallengeStatus challengeStatus) {
         this.user = user;
         this.mission = mission;
+        this.challengeStatus = challengeStatus;
         this.startedAt = LocalDateTime.now();
-        this.challengeStatus = ChallengeStatus.IN_PROGRESS; // 미션 진행
     }
 
     /**

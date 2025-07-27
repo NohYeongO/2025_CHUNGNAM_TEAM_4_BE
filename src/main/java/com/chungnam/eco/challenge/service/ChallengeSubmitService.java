@@ -1,6 +1,7 @@
 package com.chungnam.eco.challenge.service;
 
 import com.chungnam.eco.challenge.domain.Challenge;
+import com.chungnam.eco.challenge.domain.ChallengeStatus;
 import com.chungnam.eco.challenge.repository.ChallengeJPARepository;
 import com.chungnam.eco.challenge.repository.ChallengeImageJPARepository;
 import com.chungnam.eco.challenge.service.dto.ChallengeDto;
@@ -41,6 +42,7 @@ public class ChallengeSubmitService {
         Challenge tempChallenge = Challenge.builder()
                 .user(userInfo.toEntity())
                 .mission(userMission.getMission())
+                .challengeStatus(ChallengeStatus.IN_PROGRESS)
                 .build();
 
         return ChallengeDto.from(challengeRepository.save(tempChallenge), userInfo.getUserId(), userMissionId);
