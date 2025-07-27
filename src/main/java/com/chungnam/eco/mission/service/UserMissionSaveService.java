@@ -30,6 +30,7 @@ public class UserMissionSaveService {
             return new DataIntegrityException();
         });
         userMission.submitStatusUpdate();
+        userMissionRepository.save(userMission);
     }
 
     /**
