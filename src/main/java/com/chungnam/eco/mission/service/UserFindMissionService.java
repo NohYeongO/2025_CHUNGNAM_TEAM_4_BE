@@ -11,12 +11,15 @@ import com.chungnam.eco.user.domain.User;
 import com.chungnam.eco.mission.repository.UserMissionJPARepository;
 import com.chungnam.eco.user.service.dto.UserInfoDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserFindMissionService {
@@ -24,6 +27,8 @@ public class UserFindMissionService {
     private final UserMissionJPARepository userMissionRepository;
     private final MissionJPARepository missionRepository;
     private final DiscordNotificationService discordNotificationService;
+    private final CacheManager caffeineCacheManager;
+    private final CacheManager redisCacheManager;
 
     @Cacheable(value = "dailyMissions", key = "#userInfo.userId", cacheManager = "caffeineCacheManager",unless = "#result == null or #result.isEmpty()")
     public List<UserMissionDto> getDailyMissions(UserInfoDto userInfo) {
@@ -35,19 +40,29 @@ public class UserFindMissionService {
         return getUserMissions(userInfo, MissionType.WEEKLY);
     }
 
-    @CacheEvict(value = "dailyMissions", key = "#userInfo.userId", cacheManager = "caffeineCacheManager")
-    public void evictDailyMissionsCache(UserInfoDto userInfo) {
-        // 캐시 무효화만 수행
-    }
-
-    @CacheEvict(value = "weeklyMissions", key = "#userInfo.userId", cacheManager = "redisCacheManager")
-    public void evictWeeklyMissionsCache(UserInfoDto userInfo) {
-        // 캐시 무효화만 수행
-    }
-
     public void evictAllMissionsCache(UserInfoDto userInfo) {
-        evictDailyMissionsCache(userInfo);
-        evictWeeklyMissionsCache(userInfo);
+        try {
+            String userId = String.valueOf(userInfo.getUserId());
+            
+            // Caffeine 캐시 무효화
+            var dailyCache = caffeineCacheManager.getCache("dailyMissions");
+            if (dailyCache != null) {
+                dailyCache.evict(userId);
+                log.info("일일 미션 캐시 무효화 완료 - 사용자 ID: {}", userId);
+            }
+            
+            // Redis 캐시 무효화
+            var weeklyCache = redisCacheManager.getCache("weeklyMissions");
+            if (weeklyCache != null) {
+                weeklyCache.evict(userId);
+                log.info("주간 미션 캐시 무효화 완료 - 사용자 ID: {}", userId);
+            }
+            
+            log.info("모든 미션 캐시 무효화 완료 - 사용자 ID: {}", userId);
+        } catch (Exception e) {
+            log.error("캐시 무효화 중 오류 발생 - 사용자 ID: {}, 오류: {}", userInfo.getUserId(), e.getMessage());
+            throw e;
+        }
     }
 
     private List<UserMissionDto> getUserMissions(UserInfoDto userInfo, MissionType missionType) {
