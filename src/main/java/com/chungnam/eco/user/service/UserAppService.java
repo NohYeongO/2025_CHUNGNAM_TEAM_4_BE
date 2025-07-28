@@ -16,6 +16,7 @@ import com.chungnam.eco.community.service.dto.PostDetailDto;
 import com.chungnam.eco.community.service.dto.PostDto;
 import com.chungnam.eco.community.service.dto.PostListDto;
 import com.chungnam.eco.mission.domain.MissionType;
+import com.chungnam.eco.mission.service.MissionCacheService;
 import com.chungnam.eco.mission.service.UserFindMissionService;
 import com.chungnam.eco.mission.service.UserMissionSaveService;
 import com.chungnam.eco.mission.service.dto.UserMissionDto;
@@ -50,6 +51,7 @@ public class UserAppService {
     private final UserMissionSaveService userMissionSaveService;
     private final PostService postService;
     private final PostSubmitService postSubmitService;
+    private final MissionCacheService missionCacheService;
 
     /**
      * 사용자 메인 정보 조회 서비스 (controller, service 중간계츨 - UserAppService)
@@ -157,7 +159,9 @@ public class UserAppService {
             List<ImageUploadDto> ImageUploadDto = azureBlobStorageService.uploadImages(images);
             Long challengeId = challengeSubmitService.completeMissionSubmit(tempChallenge, ImageUploadDto, description);
             userMissionSaveService.submitMissionStatusUpdate(userMissionId);
-            userFindMissionService.evictAllMissionsCache(userInfo);
+            
+            missionCacheService.evictAllMissionsCache(userInfo);
+
             return MissionSubmitResponse.success(challengeId);
         } catch (InvalidMissionStatusException e){
            throw new InvalidMissionStatusException();
