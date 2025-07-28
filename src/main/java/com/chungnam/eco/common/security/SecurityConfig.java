@@ -1,5 +1,6 @@
 package com.chungnam.eco.common.security;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +15,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -40,13 +39,13 @@ public class SecurityConfig {
         http
                 // CORS 허용
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                
+
                 // CSRF 비활성화 (JWT 사용시 불필요)
                 .csrf(AbstractHttpConfigurer::disable)
-                
+
                 // 세션 사용 안함 (JWT 기반 인증)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                
+
                 // URL별 인증 설정
                 .authorizeHttpRequests(auth -> auth
                         // 공개 API (인증 불필요)
@@ -57,16 +56,17 @@ public class SecurityConfig {
                                 "/api/users/find-id",           // 아이디 찾기
                                 "/api/users/reset-password",    // 비밀번호 재설정
                                 "/api/verification/confirm",    // 본인 확인
-                                "/api/auth/refresh"             // 토큰 갱신
+                                "/api/auth/refresh",            // 토큰 갱신
+                                "/api/pay/point"                // 포인트로 결제하기
                         ).permitAll()
-                        
+
                         // 관리자 API
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        
+
                         // 나머지는 모두 인증 필요
                         .anyRequest().authenticated()
                 )
-                
+
                 // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -1,6 +1,5 @@
 package com.chungnam.eco.point.controller;
 
-import com.chungnam.eco.common.security.AuthenticationHelper;
 import com.chungnam.eco.point.controller.request.UsedPointRequest;
 import com.chungnam.eco.point.controller.response.UsedPointResponse;
 import com.chungnam.eco.point.service.PayService;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/pay")
 @RequiredArgsConstructor
 public class ShopController {
     private final PayService payService;
@@ -24,11 +23,10 @@ public class ShopController {
      *
      * @param request 포인트 사용 요청 데이터 (가맹점 이름, 사용 포인트)
      */
-    @PostMapping("/pay")
+    @PostMapping("/point")
     public ResponseEntity<UsedPointResponse> usedPoint(@Valid @RequestBody UsedPointRequest request) {
-        Long userId = AuthenticationHelper.getCurrentUserId();
 
-        PointDto pointDto = payService.usedPoints(userId, request.getShop_name(), request.getPoints());
+        PointDto pointDto = payService.usedPoints(request.getUserId(), request.getShop_name(), request.getPoints());
 
         UsedPointResponse response = UsedPointResponse.from(pointDto);
         return ResponseEntity.ok(response);
