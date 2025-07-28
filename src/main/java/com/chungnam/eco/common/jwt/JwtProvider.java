@@ -1,19 +1,18 @@
 package com.chungnam.eco.common.jwt;
 
+
 import com.chungnam.eco.common.exception.CustomException;
 import com.chungnam.eco.common.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Value;
-
-import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
+import javax.crypto.SecretKey;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
@@ -29,6 +28,13 @@ public class JwtProvider {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         this.accessTokenExpiration = accessTokenExpiration * 1000; // 초를 밀리초로 변환
         this.refreshTokenExpiration = refreshTokenExpiration * 1000;
+    }
+
+    /**
+     * QR Token 생성 (1분 유효)
+     */
+    public String generateQRToken(Long userId, String role) {
+        return generateToken(userId, role, 1000 * 60, "QR");
     }
 
     /**
