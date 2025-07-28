@@ -1,5 +1,6 @@
 package com.chungnam.eco.user.controller;
 
+import com.chungnam.eco.common.exception.CustomException;
 import com.chungnam.eco.common.security.AuthenticationHelper;
 import com.chungnam.eco.user.controller.request.FindUserIdRequest;
 import com.chungnam.eco.user.controller.request.ResetPasswordRequest;
@@ -60,10 +61,13 @@ public class UserController {
      */
     @PostMapping("/sign-in")
     public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest request) {
-        SignInResponse response = userAuthService.signIn(request);
-        return response.isSuccess() 
-                ? ResponseEntity.ok(response) 
-                : ResponseEntity.badRequest().body(response);
+        try {
+            SignInResponse response = userAuthService.signIn(request);
+            return ResponseEntity.ok(response);
+        } catch (CustomException e) {
+            SignInResponse response = SignInResponse.failure(e.getMessage());
+            return ResponseEntity.status(e.getErrorCode().getHttpStatus()).body(response);
+        }
     }
 
     /**

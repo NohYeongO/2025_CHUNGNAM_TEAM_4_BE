@@ -3,11 +3,13 @@ package com.chungnam.eco.user.controller.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class VerificationRequest {
 
     @Email(message = "올바른 이메일 형식이 아닙니다")

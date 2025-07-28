@@ -2,9 +2,11 @@ package com.chungnam.eco.community.repository;
 
 import com.chungnam.eco.community.domain.PostLike;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -17,6 +19,7 @@ public interface PostLikeJPARepository extends JpaRepository<PostLike, Long> {
     @Query("SELECT COUNT(pl) > 0 FROM PostLike pl WHERE pl.post.id = :postId AND pl.user.id = :userId")
     boolean existsByPostIdAndUserId(@Param("postId") Long postId, @Param("userId") Long userId);
 
+    @Modifying
     @Query("DELETE FROM PostLike pl WHERE pl.post.id = :postId AND pl.user.id = :userId")
     void deleteByPostIdAndUserId(@Param("postId") Long postId, @Param("userId") Long userId);
 }
