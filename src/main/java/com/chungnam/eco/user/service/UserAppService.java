@@ -10,6 +10,11 @@ import com.chungnam.eco.common.exception.MissionNotFoundExcption;
 import com.chungnam.eco.common.exception.InsufficientMissionException;
 import com.chungnam.eco.common.storage.AzureBlobStorageService;
 import com.chungnam.eco.common.storage.ImageUploadDto;
+import com.chungnam.eco.community.service.PostService;
+import com.chungnam.eco.community.service.PostSubmitService;
+import com.chungnam.eco.community.service.dto.PostDetailDto;
+import com.chungnam.eco.community.service.dto.PostDto;
+import com.chungnam.eco.community.service.dto.PostListDto;
 import com.chungnam.eco.mission.domain.MissionType;
 import com.chungnam.eco.mission.service.UserFindMissionService;
 import com.chungnam.eco.mission.service.UserMissionSaveService;
@@ -25,6 +30,7 @@ import com.chungnam.eco.user.service.dto.*;
 import com.chungnam.eco.user.service.result.MissionProcessResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,6 +48,8 @@ public class UserAppService {
     private final AzureBlobStorageService azureBlobStorageService;
     private final ChallengeSubmitService challengeSubmitService;
     private final UserMissionSaveService userMissionSaveService;
+    private final PostService postService;
+    private final PostSubmitService postSubmitService;
 
     /**
      * 사용자 메인 정보 조회 서비스 (controller, service 중간계츨 - UserAppService)
@@ -158,5 +166,51 @@ public class UserAppService {
             }
             throw new ImageUploadException(e.getMessage());
         }
+    }
+
+    /**
+     * 게시글 목록 조회
+     */
+    public Page<PostListDto> getPostList(int page, int limit, String sort) {
+        return postService.getPostList(page, limit, sort);
+    }
+
+    /**
+     * 게시글 상세 조회
+     */
+    public PostDetailDto getPostDetail(Long postId, Long currentUserId) {
+        UserInfoDto userInfo = UserInfoDto.from(userAuthService.getUserById(currentUserId));
+        return postService.getPostDetail(postId, userInfo);
+    }
+
+    /**
+     * 게시글 작성
+     */
+    public Long createPost(String title, String content, List<MultipartFile> images, Long userId) {
+        PostDto tempPost = null;
+        try {
+            UserInfoDto userInfo = UserInfoDto.from(userAuthService.getUserById(userId));
+            tempPost = postSubmitService.createTempPost(userInfo, title, content);
+            
+            List<ImageUploadDto> uploadedImages = null;
+            if (images != null && !images.isEmpty()) {
+                uploadedImages = azureBlobStorageService.uploadImages(images);
+            }
+            
+            return postSubmitService.completePostSubmit(tempPost, uploadedImages);
+        } catch (Exception e) {
+            if (tempPost != null) {
+                postSubmitService.deleteTempPost(tempPost);
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * 게시글 좋아요 토글
+     */
+    public boolean togglePostLike(Long postId, Long userId) {
+        UserInfoDto userInfo = UserInfoDto.from(userAuthService.getUserById(userId));
+        return postService.togglePostLike(postId, userInfo);
     }
 }

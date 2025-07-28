@@ -35,7 +35,13 @@ public enum ErrorCode {
     IMAGE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "I001", "이미지 업로드에 실패했습니다."),
 
     // AI 에러
-    AI_MISSION_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI001", "AI 기반 미션 생성 중 오류가 발생했습니다.");
+    AI_MISSION_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI001", "AI 기반 미션 생성 중 오류가 발생했습니다."),
+
+    // 커뮤니티 관련 에러
+    INVALID_POST_REQUEST(HttpStatus.BAD_REQUEST, "C001", "잘못된 게시글 요청입니다."),
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "C002", "게시글을 찾을 수 없습니다."),
+    POST_CREATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "C003", "게시글 작성에 실패했습니다."),
+    POST_LIKE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "C004", "게시글 좋아요 처리에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

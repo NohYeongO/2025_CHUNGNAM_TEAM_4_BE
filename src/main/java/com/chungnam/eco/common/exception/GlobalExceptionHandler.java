@@ -275,6 +275,90 @@ public class GlobalExceptionHandler {
      }
 
      /**
+      * PostNotFoundException 처리
+      */
+     @ExceptionHandler(PostNotFoundException.class)
+     public ResponseEntity<ErrorResponse> handlePostNotFoundException(
+             PostNotFoundException e,
+             HttpServletRequest request) {
+
+         log.warn("Post not found: {}", e.getMessage());
+
+         ErrorResponse errorResponse = ErrorResponse.of(
+                 e.getErrorCode().getCode(),
+                 e.getMessage(),
+                 request.getRequestURI()
+         );
+
+         return ResponseEntity
+                 .status(e.getErrorCode().getHttpStatus())
+                 .body(errorResponse);
+     }
+
+     /**
+      * PostCreateException 처리
+      */
+     @ExceptionHandler(PostCreateException.class)
+     public ResponseEntity<ErrorResponse> handlePostCreateException(
+             PostCreateException e,
+             HttpServletRequest request) {
+
+         log.warn("Post creation failed: {}", e.getMessage());
+
+         ErrorResponse errorResponse = ErrorResponse.of(
+                 e.getErrorCode().getCode(),
+                 e.getMessage(),
+                 request.getRequestURI()
+         );
+
+         return ResponseEntity
+                 .status(e.getErrorCode().getHttpStatus())
+                 .body(errorResponse);
+     }
+
+     /**
+      * PostLikeException 처리
+      */
+     @ExceptionHandler(PostLikeException.class)
+     public ResponseEntity<ErrorResponse> handlePostLikeException(
+             PostLikeException e,
+             HttpServletRequest request) {
+
+         log.warn("Post like failed: {}", e.getMessage());
+
+         ErrorResponse errorResponse = ErrorResponse.of(
+                 e.getErrorCode().getCode(),
+                 e.getMessage(),
+                 request.getRequestURI()
+         );
+
+         return ResponseEntity
+                 .status(e.getErrorCode().getHttpStatus())
+                 .body(errorResponse);
+     }
+
+     /**
+      * InvalidPostRequestException 처리
+      */
+     @ExceptionHandler(InvalidPostRequestException.class)
+     public ResponseEntity<ErrorResponse> handleInvalidPostRequestException(
+             InvalidPostRequestException e,
+             HttpServletRequest request) {
+
+         log.warn("Invalid post request: {}", e.getMessage());
+
+         ErrorResponse errorResponse = ErrorResponse.of(
+                 e.getErrorCode().getCode(),
+                 e.getMessage(),
+                 request.getRequestURI()
+         );
+
+         return ResponseEntity
+                 .status(e.getErrorCode().getHttpStatus())
+                 .body(errorResponse);
+     }
+
+     /**
       * MissingServletRequestPartException 처리 (@RequestPart 누락)
       */
      @ExceptionHandler(MissingServletRequestPartException.class)
