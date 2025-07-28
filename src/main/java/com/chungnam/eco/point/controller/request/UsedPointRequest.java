@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UsedPointRequest {
-    private Long userId;
+    private String token;
     private Integer points;
     private String shop_name;
 }
