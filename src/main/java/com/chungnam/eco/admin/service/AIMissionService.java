@@ -54,6 +54,16 @@ public class AIMissionService {
     }
 
     /**
+     * 설정한 값 이내의 point 인지 검증
+     */
+    private boolean isValid(AIMissionDto missionDto) {
+        return switch (missionDto.getType()) {
+            case DAILY -> missionDto.getRewardPoints() >= 20 && missionDto.getRewardPoints() <= 100;
+            case WEEKLY -> missionDto.getRewardPoints() >= 100 && missionDto.getRewardPoints() <= 300;
+        };
+    }
+
+    /**
      * 조건은 인자로 받고 미션 생성
      *
      * @param missionCategory 생성할 미션 카테고리
@@ -74,6 +84,7 @@ public class AIMissionService {
             return openAIClient.chat().completions().create(createParams).choices().stream()
                     .flatMap(choice -> choice.message().content().stream())
                     .flatMap(aiMissionListResponseDto -> aiMissionListResponseDto.getMissions().stream())
+                    .filter(this::isValid) // 유효성 검증
                     .toList();
         } catch (Exception e) {
             throw new AICreationExceptions("AI 기반 미션 생성중 오류");
