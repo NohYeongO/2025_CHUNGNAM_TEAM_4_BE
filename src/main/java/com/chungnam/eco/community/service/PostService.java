@@ -13,6 +13,7 @@ import com.chungnam.eco.community.service.dto.PostListDto;
 import com.chungnam.eco.user.service.dto.UserInfoDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +32,9 @@ public class PostService {
     private final PostImageJPARepository postImageRepository;
     private final PostLikeJPARepository postLikeRepository;
 
+    @Value("${azure.storage.sas-token}")
+    private String sasToken;
+
     /**
      * 게시글 목록 조회 (페이징 및 정렬)
      */
@@ -47,7 +51,7 @@ public class PostService {
         return posts.map(post -> {
             List<String> imageUrls = postImageRepository.findByPostIdOrderBySort(post.getId())
                     .stream()
-                    .map(PostImage::getUrl)
+                    .map(image -> image.getUrl() + sasToken)
                     .toList();
             return PostListDto.from(post, imageUrls);
         });
@@ -62,7 +66,7 @@ public class PostService {
                 .orElseThrow(() -> new PostNotFoundException("게시글을 찾을 수 없습니다. ID: " + postId));
         boolean isLiked = postLikeRepository.existsByPostIdAndUserId(postId, userInfo.getUserId());
         List<PostImage> images = postImageRepository.findByPostIdOrderBySort(postId);
-        return PostDetailDto.from(post, images, isLiked);
+        return PostDetailDto.from(post, images, isLiked, sasToken);
     }
 
     /**

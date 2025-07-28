@@ -22,9 +22,16 @@ public class PostDetailDto {
     private final List<PostImageDto> images;
     private final boolean isLiked;
 
-    public static PostDetailDto from(Post post, List<PostImage> images, boolean isLiked) {
-        List<PostImageDto> imageDtos = images.stream()
-                .map(PostImageDto::from)
+    public static PostDetailDto from(Post post, List<PostImage> images, boolean isLiked, String sasToken) {
+        List<PostImageDto> imageList = images.stream()
+                .map(image -> {
+                    PostImageDto dto = PostImageDto.from(image);
+                    String urlWithToken = dto.getUrl() + (sasToken != null ? sasToken : "");
+                    return PostImageDto.builder()
+                            .id(dto.getId())
+                            .url(urlWithToken)
+                            .build();
+                })
                 .toList();
 
         return PostDetailDto.builder()
@@ -36,7 +43,7 @@ public class PostDetailDto {
                 .commentCount(post.getCommentCount())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
-                .images(imageDtos)
+                .images(imageList)
                 .isLiked(isLiked)
                 .build();
     }
