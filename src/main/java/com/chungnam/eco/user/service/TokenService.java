@@ -1,11 +1,12 @@
 package com.chungnam.eco.user.service;
 
-import com.chungnam.eco.common.exception.InvalidTokenException;
+import com.chungnam.eco.common.exception.CustomException;
+import com.chungnam.eco.common.exception.ErrorCode;
 import com.chungnam.eco.common.jwt.JwtProvider;
 import com.chungnam.eco.user.domain.RefreshToken;
 import com.chungnam.eco.user.domain.User;
 import com.chungnam.eco.user.repository.RefreshTokenRepository;
-import io.jsonwebtoken.JwtException;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -48,35 +51,48 @@ public class TokenService {
     }
 
     /**
-     * Refresh Token으로 Access Token 갱신
+     * Refresh Token 새로운 토큰 쌍 생성
      */
     @Transactional
-    public String refreshAccessToken(String refreshToken) {
+    public Map<String, Object> refreshTokens(String refreshToken) {
         // Refresh Token 유효성 검증
         if (!jwtProvider.validateToken(refreshToken)) {
-            throw new InvalidTokenException("유효하지 않은 Refresh Token입니다.");
+            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         // 토큰 타입 확인
         if (!"REFRESH".equals(jwtProvider.getTokenType(refreshToken))) {
-            throw new InvalidTokenException("Refresh Token이 아닙니다.");
+            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        // DB에서 Refresh Token 조회
+        // DB Refresh Token 조회
         RefreshToken storedToken = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new InvalidTokenException("Refresh Token을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REFRESH_TOKEN));
 
         // 만료 검증
         if (storedToken.isExpired()) {
             refreshTokenRepository.delete(storedToken);
-            throw new InvalidTokenException("만료된 Refresh Token입니다.");
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_EXPIRED);
         }
 
-        // 새로운 Access Token 생성
+        // 새로운 토큰 쌍 생성
         Long userId = jwtProvider.getUserId(refreshToken);
         String userRole = jwtProvider.getUserRole(refreshToken);
 
-        return jwtProvider.generateAccessToken(userId, userRole);
+        String newAccessToken = jwtProvider.generateAccessToken(userId, userRole);
+        String newRefreshToken = jwtProvider.generateRefreshToken(userId, userRole);
+
+        // 새로운 Refresh Token 업데이트
+        storedToken.updateToken(newRefreshToken, jwtProvider.getRefreshTokenExpiryDate());
+        refreshTokenRepository.save(storedToken);
+
+        // 응답 데이터 준비
+        Map<String, Object> tokenData = new HashMap<>();
+        tokenData.put("accessToken", newAccessToken);
+        tokenData.put("refreshToken", newRefreshToken);
+        tokenData.put("expiresIn", jwtProvider.getAccessTokenValidityInSeconds());
+
+        return tokenData;
     }
 
     /**
@@ -100,6 +116,7 @@ public class TokenService {
     /**
      * 토큰 쌍을 담는 내부 클래스
      */
+    @Getter
     public static class TokenPair {
         private final String accessToken;
         private final String refreshToken;
@@ -109,12 +126,5 @@ public class TokenService {
             this.refreshToken = refreshToken;
         }
 
-        public String getAccessToken() {
-            return accessToken;
-        }
-
-        public String getRefreshToken() {
-            return refreshToken;
-        }
     }
 }

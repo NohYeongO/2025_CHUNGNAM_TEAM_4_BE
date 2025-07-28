@@ -29,7 +29,13 @@ public enum ErrorCode {
 
     // 인증/인가 관련 에러
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A001", "유효하지 않은 토큰입니다."),
-    MISSING_AUTHORIZATION_HEADER(HttpStatus.UNAUTHORIZED, "A002", "Authorization 헤더가 없거나 Bearer 토큰 형식이 아닙니다."),
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A002", "토큰이 만료되었습니다."),
+    MISSING_AUTHORIZATION_HEADER(HttpStatus.UNAUTHORIZED, "A003", "Authorization 헤더가 없거나 Bearer 토큰 형식이 아닙니다."),
+    INVALID_LOGIN_CREDENTIALS(HttpStatus.UNAUTHORIZED, "A004", "아이디 또는 비밀번호가 올바르지 않습니다."),
+    ACCESS_DENIED(HttpStatus.FORBIDDEN, "A005", "접근이 거부되었습니다."),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A006", "리프레시 토큰이 만료되었습니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "A007", "유효하지 않은 리프레시 토큰입니다."),
+    TOKEN_REFRESH_FAILED(HttpStatus.UNAUTHORIZED, "A008", "토큰 갱신에 실패했습니다."),
 
     // 이미지 업로드 관련 에러
     IMAGE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "I001", "이미지 업로드에 실패했습니다."),

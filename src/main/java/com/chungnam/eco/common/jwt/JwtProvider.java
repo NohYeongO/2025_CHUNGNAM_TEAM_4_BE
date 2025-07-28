@@ -1,5 +1,7 @@
 package com.chungnam.eco.common.jwt;
 
+import com.chungnam.eco.common.exception.CustomException;
+import com.chungnam.eco.common.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +63,7 @@ public class JwtProvider {
     }
 
     /**
-     * Refresh Token의 만료 시간을 LocalDateTime으로 반환
+     * Refresh Token의 만료 시간을 LocalDateTime 반환
      */
     public LocalDateTime getRefreshTokenExpiryDate() {
         return LocalDateTime.now().plusSeconds(refreshTokenExpiration / 1000);
@@ -96,11 +98,17 @@ public class JwtProvider {
      * JWT 토큰에서 Claims 추출
      */
     private Claims getClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        try {
+            return Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
+        } catch (UnsupportedJwtException | MalformedJwtException | SecurityException | IllegalArgumentException e) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        }
     }
 
     /**
@@ -114,7 +122,7 @@ public class JwtProvider {
             log.error("Invalid JWT token: {}", e.getMessage());
             throw e;
         } catch (NumberFormatException e) {
-            throw new JwtException("토큰에 포함된 사용자 ID 형식이 올바르지 않습니다.");
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
     }
 
@@ -122,11 +130,32 @@ public class JwtProvider {
      * JWT 토큰에서 사용자 권한 추출
      */
     public String getUserRole(String token) {
-        try {
-            return getClaims(token).get("role", String.class);
-        } catch (JwtException e) {
-            log.error("Invalid JWT token: {}", e.getMessage());
-            throw e;
+        return getClaims(token).get("role", String.class);
+    }
+
+    /**
+     * 토큰이 곧 만료될 예정인지 확인 (만료 2초 전)
+     */
+    public boolean isTokenExpiringSoon(String token) {
+        try{
+            Claims claims = getClaims(token);
+            Date expiration = claims.getExpiration();
+            Date now = new Date();
+
+            // 2초 = 2,000밀리초 (5초 토큰에 맞게 조정)
+            long twoSecondsInMs = 2 * 1000;
+            long timeUntilExpiry = expiration.getTime() - now.getTime();
+
+            return timeUntilExpiry <= twoSecondsInMs && timeUntilExpiry > 0;
+        } catch (Exception e) {
+            return false;
         }
+    }
+
+    /**
+     * Access Token 만료 시간(초) 반환
+     */
+    public Long getAccessTokenValidityInSeconds() {
+        return accessTokenExpiration / 1000;
     }
 }

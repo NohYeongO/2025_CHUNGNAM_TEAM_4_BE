@@ -1,5 +1,7 @@
 package com.chungnam.eco.user.service;
 
+import com.chungnam.eco.common.exception.CustomException;
+import com.chungnam.eco.common.exception.ErrorCode;
 import com.chungnam.eco.common.exception.UserNotFoundException;
 import com.chungnam.eco.user.controller.request.FindUserIdRequest;
 import com.chungnam.eco.user.controller.request.SignInRequest;
@@ -70,23 +72,22 @@ public class UserAuthService {
      */
     @Transactional
     public SignInResponse signIn(SignInRequest request) {
-        return userRepository.findByEmail(request.getEmail())
-                .map(user -> {
-                    // 비밀번호 검증
-                    if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-                        return SignInResponse.failure("비밀번호가 일치하지 않습니다.");
-                    }
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_LOGIN_CREDENTIALS));
 
-                    // 토큰 쌍 생성 (Access + Refresh)
-                    TokenPair tokenPair = tokenService.createTokenPair(user);
+        // 비밀번호 검증
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new CustomException(ErrorCode.INVALID_LOGIN_CREDENTIALS);
+        }
 
-                    return SignInResponse.success(
-                            tokenPair.getAccessToken(),
-                            tokenPair.getRefreshToken(),
-                            user
-                    );
-                })
-                .orElse(SignInResponse.failure("등록되지 않은 이메일입니다."));
+        // 토큰 쌍 생성 (Access + Refresh)
+        TokenPair tokenPair = tokenService.createTokenPair(user);
+
+        return SignInResponse.success(
+                tokenPair.getAccessToken(),
+                tokenPair.getRefreshToken(),
+                user
+        );
     }
 
     /**

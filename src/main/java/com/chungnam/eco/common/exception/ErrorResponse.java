@@ -13,6 +13,8 @@ public class ErrorResponse {
     private final String message;
     private final LocalDateTime timestamp;
     private final String path;
+    private final int status;
+    private final String error;
     
     public static ErrorResponse of(String code, String message, String path) {
         return ErrorResponse.builder()
@@ -20,6 +22,16 @@ public class ErrorResponse {
                 .message(message)
                 .timestamp(LocalDateTime.now())
                 .path(path)
+                .build();
+    }
+
+    public static ErrorResponse from(ErrorCode errorCode) {
+        return ErrorResponse.builder()
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .status(errorCode.getHttpStatus().value())
+                .error(errorCode.getHttpStatus().getReasonPhrase())
+                .timestamp(LocalDateTime.now())
                 .build();
     }
 }
