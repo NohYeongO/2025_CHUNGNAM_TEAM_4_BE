@@ -24,19 +24,4 @@ public class MissionCacheService {
     public void evictWeeklyMissionsCache(UserInfoDto userInfo) {
         log.info("주간 미션 캐시 무효화 - 사용자 ID: {}", userInfo.getUserId());
     }
-
-    /**
-     * 모든 미션 캐시 무효화
-     */
-    public void evictAllMissionsCache(UserInfoDto userInfo) {
-        try {
-            // 별도 서비스에서 호출하므로 AOP 프록시가 정상 작동
-            evictDailyMissionsCache(userInfo);
-            evictWeeklyMissionsCache(userInfo);
-            log.info("모든 미션 캐시 무효화 완료 - 사용자 ID: {}", userInfo.getUserId());
-        } catch (Exception e) {
-            log.error("캐시 무효화 중 오류 발생 - 사용자 ID: {}, 오류: {}", userInfo.getUserId(), e.getMessage());
-            throw e;
-        }
-    }
-} 
+}

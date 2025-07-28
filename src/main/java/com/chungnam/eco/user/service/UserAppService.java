@@ -160,7 +160,8 @@ public class UserAppService {
             Long challengeId = challengeSubmitService.completeMissionSubmit(tempChallenge, ImageUploadDto, description);
             userMissionSaveService.submitMissionStatusUpdate(userMissionId);
             
-            missionCacheService.evictAllMissionsCache(userInfo);
+            missionCacheService.evictDailyMissionsCache(userInfo);
+            missionCacheService.evictWeeklyMissionsCache(userInfo);
 
             return MissionSubmitResponse.success(challengeId);
         } catch (InvalidMissionStatusException e){
