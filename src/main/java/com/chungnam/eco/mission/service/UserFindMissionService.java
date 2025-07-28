@@ -11,6 +11,7 @@ import com.chungnam.eco.user.domain.User;
 import com.chungnam.eco.mission.repository.UserMissionJPARepository;
 import com.chungnam.eco.user.service.dto.UserInfoDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,21 @@ public class UserFindMissionService {
     @Cacheable(value = "weeklyMissions", key = "#userInfo.userId", cacheManager = "redisCacheManager",unless = "#result == null or #result.isEmpty()")
     public List<UserMissionDto> getWeeklyMissions(UserInfoDto userInfo) {
         return getUserMissions(userInfo, MissionType.WEEKLY);
+    }
+
+    @CacheEvict(value = "dailyMissions", key = "#userInfo.userId", cacheManager = "caffeineCacheManager")
+    public void evictDailyMissionsCache(UserInfoDto userInfo) {
+        // 캐시 무효화만 수행
+    }
+
+    @CacheEvict(value = "weeklyMissions", key = "#userInfo.userId", cacheManager = "redisCacheManager")
+    public void evictWeeklyMissionsCache(UserInfoDto userInfo) {
+        // 캐시 무효화만 수행
+    }
+
+    public void evictAllMissionsCache(UserInfoDto userInfo) {
+        evictDailyMissionsCache(userInfo);
+        evictWeeklyMissionsCache(userInfo);
     }
 
     private List<UserMissionDto> getUserMissions(UserInfoDto userInfo, MissionType missionType) {

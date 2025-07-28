@@ -157,6 +157,7 @@ public class UserAppService {
             List<ImageUploadDto> ImageUploadDto = azureBlobStorageService.uploadImages(images);
             Long challengeId = challengeSubmitService.completeMissionSubmit(tempChallenge, ImageUploadDto, description);
             userMissionSaveService.submitMissionStatusUpdate(userMissionId);
+            userFindMissionService.evictAllMissionsCache(userInfo);
             return MissionSubmitResponse.success(challengeId);
         } catch (InvalidMissionStatusException e){
            throw new InvalidMissionStatusException();
